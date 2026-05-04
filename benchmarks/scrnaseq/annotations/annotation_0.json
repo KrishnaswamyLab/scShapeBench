@@ -1,0 +1,379 @@
+{
+  "labels": {
+    "SCD-0099": [
+      "simple_traj"
+    ],
+    "SCD-0001": [
+      "multi_branch"
+    ],
+    "SCD-0060": [
+      "bifurcation"
+    ],
+    "SCD-0005": [
+      "simple_traj"
+    ],
+    "SCD-0087": [
+      "blob"
+    ],
+    "SCD-0111": [
+      "blob",
+      "multi_branch"
+    ],
+    "SCD-0022": [
+      "bifurcation",
+      "clusters"
+    ],
+    "SCD-0021": [
+      "clusters"
+    ],
+    "SCD-0069": [
+      "archetypal"
+    ],
+    "SCD-0052": [
+      "bifurcation"
+    ],
+    "SCD-0102": [
+      "multi_branch"
+    ],
+    "SCD-0079": [
+      "bifurcation",
+      "clusters"
+    ],
+    "SCD-0003": [
+      "multi_branch"
+    ],
+    "SCD-0016": [
+      "bifurcation",
+      "archetypal"
+    ],
+    "SCD-0010": [
+      "multi_branch"
+    ],
+    "SCD-0033": [
+      "blob"
+    ],
+    "SCD-0014": [
+      "archetypal",
+      "clusters"
+    ],
+    "SCD-0103": [
+      "clusters",
+      "blob",
+      "archetypal"
+    ],
+    "SCD-0024": [
+      "clusters"
+    ],
+    "SCD-0106": [
+      "multi_branch",
+      "blob"
+    ],
+    "SCD-0081": [
+      "blob"
+    ],
+    "SCD-0086": [
+      "blob",
+      "clusters"
+    ],
+    "SCD-0057": [
+      "archetypal",
+      "clusters"
+    ],
+    "SCD-0051": [
+      "multi_branch",
+      "blob"
+    ],
+    "Immune": [
+      "clusters"
+    ],
+    "SCD-0090": [
+      "blob"
+    ],
+    "SCD-0067": [
+      "simple_traj"
+    ],
+    "SCD-0061": [
+      "simple_traj"
+    ],
+    "SCD-0008": [
+      "simple_traj"
+    ],
+    "SCD-0110": [
+      "blob",
+      "bifurcation"
+    ],
+    "SCD-0091": [
+      "clusters"
+    ],
+    "SCD-0011": [
+      "simple_traj"
+    ],
+    "SCD-0007": [
+      "multi_branch"
+    ],
+    "SCD-0092": [
+      "blob"
+    ],
+    "SCD-0006": [
+      "archetypal",
+      "blob"
+    ],
+    "SCD-0059": [
+      "bifurcation"
+    ],
+    "SCD-0018": [
+      "clusters",
+      "multi_branch"
+    ],
+    "SCD-0062": [
+      "multi_branch"
+    ],
+    "SCD-0055": [
+      "bifurcation",
+      "archetypal"
+    ],
+    "SCD-0048": [
+      "clusters"
+    ],
+    "SCD-0072": [
+      "bifurcation"
+    ],
+    "SCD-0085": [
+      "archetypal"
+    ],
+    "SCD-0023": [
+      "clusters"
+    ],
+    "SCD-0054": [
+      "simple_traj"
+    ],
+    "Pvalb": [
+      "bifurcation"
+    ],
+    "SCD-0101": [
+      "multi_branch"
+    ],
+    "SCD-0019": [
+      "archetypal"
+    ],
+    "SCD-0076": [
+      "simple_traj"
+    ],
+    "SCD-0047": [
+      "clusters"
+    ],
+    "SCD-0053": [
+      "simple_traj"
+    ],
+    "SCD-0025": [
+      "clusters",
+      "bifurcation"
+    ],
+    "SCD-0004": [
+      "simple_traj"
+    ],
+    "SCD-0046": [
+      "clusters"
+    ],
+    "SCD-0070": [
+      "clusters"
+    ],
+    "SCD-0104": [
+      "clusters",
+      "blob"
+    ],
+    "SCD-0082": [
+      "archetypal",
+      "clusters"
+    ],
+    "SCD-0108": [
+      "clusters",
+      "blob"
+    ],
+    "SCD-0094": [
+      "simple_traj"
+    ],
+    "SCD-0100": [
+      "clusters",
+      "blob"
+    ],
+    "SCD-0013": [
+      "bifurcation",
+      "blob"
+    ],
+    "SCD-0074": [
+      "simple_traj",
+      "blob"
+    ],
+    "SCD-0068": [
+      "blob",
+      "simple_traj"
+    ],
+    "SCD-0109": [
+      "clusters",
+      "blob"
+    ],
+    "SCD-0080": [
+      "blob"
+    ],
+    "SCD-0056": [
+      "multi_branch"
+    ],
+    "SCD-0098": [
+      "simple_traj",
+      "blob"
+    ],
+    "SCD-0089": [
+      "multi_branch"
+    ],
+    "SCD-0012": [
+      "archetypal",
+      "bifurcation"
+    ],
+    "SCD-0083": [
+      "blob",
+      "outlier_dominated"
+    ],
+    "SCD-0009": [
+      "clusters"
+    ],
+    "SCD-0028": [
+      "bifurcation"
+    ],
+    "SCD-0064": [
+      "multi_branch"
+    ],
+    "SCD-0017": [
+      "clusters"
+    ],
+    "SCD-0015": [
+      "clusters"
+    ],
+    "SCD-0088": [
+      "blob"
+    ],
+    "SCD-0029": [
+      "bifurcation"
+    ],
+    "SCD-0066": [
+      "simple_traj"
+    ],
+    "SCD-0049": [
+      "multi_branch"
+    ],
+    "SCD-0077": [
+      "multi_branch"
+    ],
+    "SCD-0105": [
+      "blob"
+    ],
+    "SCD-0020": [
+      "clusters"
+    ],
+    "A": [
+      "archetypal"
+    ],
+    "SCD-0030": [
+      "clusters"
+    ],
+    "SCD-0073": [
+      "blob"
+    ],
+    "SCD-0058": [
+      "multi_branch"
+    ],
+    "SCD-0045": [
+      "bifurcation",
+      "blob"
+    ],
+    "SCD-0065": [
+      "bifurcation"
+    ],
+    "SCD-0097": [
+      "cyclic",
+      "archetypal"
+    ],
+    "SCD-0075": [
+      "bifurcation"
+    ],
+    "SCD-0063": [
+      "archetypal",
+      "clusters"
+    ],
+    "SCD-0084": [
+      "blob"
+    ],
+    "SCD-0093": [
+      "clusters"
+    ],
+    "SCD-0107": [
+      "blob"
+    ],
+    "SCD-0078": [
+      "clusters"
+    ],
+    "SCD-0071": [
+      "blob"
+    ],
+    "SCD-0112": [
+      "blob",
+      "simple_traj"
+    ],
+    "SCD-0002": [
+      "cyclic",
+      "archetypal"
+    ],
+    "SCD-0096": [
+      "cyclic"
+    ],
+    "SCD-0027": [
+      "archetypal",
+      "complex_tree"
+    ],
+    "SCD-0050": [
+      "multi_branch"
+    ]
+  },
+  "annotations": {
+    "density": {
+      "SCD-0047": "medium",
+      "SCD-0015": "medium",
+      "SCD-0012": "high",
+      "SCD-0017": "high",
+      "SCD-0013": "high",
+      "SCD-0111": "high",
+      "SCD-0016": "high"
+    },
+    "quality": {
+      "SCD-0071": "poor",
+      "SCD-0053": "poor",
+      "SCD-0111": "good",
+      "SCD-0051": "poor",
+      "SCD-0017": "good",
+      "SCD-0015": "excellent",
+      "SCD-0049": "poor",
+      "SCD-0012": "good",
+      "SCD-0061": "poor",
+      "SCD-0016": "good",
+      "SCD-0013": "",
+      "SCD-0033": "poor",
+      "SCD-0073": "poor",
+      "SCD-0068": "poor"
+    }
+  },
+  "notes": {
+    "SCD-0001": "fds"
+  },
+  "flagged": {
+    "SCD-0002": "",
+    "SCD-0001": "",
+    "SCD-0062": "",
+    "Frozen_samples__single_nucleus__34f5307e__default_xlarge_20260303_052412": "",
+    "Midbrain_bfbd9097__default_retry_20260303_030743": "",
+    "SCD-0046": "",
+    "CD34__Fetal_Bone_Marrow__Fetal_Liver__Cord_Blood___471647b3": ""
+  },
+  "exportedAt": "2026-05-02T04:43:22.263Z",
+  "totalLabeled": 100,
+  "totalFlagged": 7
+}

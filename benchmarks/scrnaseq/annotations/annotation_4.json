@@ -1,0 +1,626 @@
+{
+  "labels": {
+    "SCD-0001": [
+      "multi_branch"
+    ],
+    "SCD-0002": [
+      "archetypal"
+    ],
+    "SCD-0003": [
+      "bifurcation"
+    ],
+    "SCD-0004": [
+      "simple_traj"
+    ],
+    "SCD-0005": [
+      "simple_traj"
+    ],
+    "SCD-0006": [
+      "simple_traj"
+    ],
+    "SCD-0007": [
+      "complex_tree"
+    ],
+    "SCD-0008": [
+      "simple_traj"
+    ],
+    "SCD-0009": [
+      "simple_traj"
+    ],
+    "SCD-0010": [
+      "bifurcation"
+    ],
+    "SCD-0011": [
+      "archetypal",
+      "surface"
+    ],
+    "SCD-0012": [
+      "surface",
+      "archetypal"
+    ],
+    "SCD-0013": [
+      "blob"
+    ],
+    "SCD-0014": [
+      "clusters",
+      "archetypal"
+    ],
+    "SCD-0015": [
+      "clusters",
+      "outlier_dominated"
+    ],
+    "SCD-0016": [
+      "multi_branch",
+      "complex_tree"
+    ],
+    "SCD-0017": [
+      "multi_branch",
+      "complex_tree"
+    ],
+    "SCD-0018": [
+      "clusters",
+      "outlier_dominated"
+    ],
+    "SCD-0019": [
+      "multi_branch"
+    ],
+    "SCD-0020": [
+      "cyclic",
+      "simple_traj"
+    ],
+    "SCD-0021": [
+      "clusters",
+      "cyclic"
+    ],
+    "SCD-0022": [
+      "cyclic",
+      "complex_tree"
+    ],
+    "SCD-0023": [
+      "complex_tree",
+      "multi_branch"
+    ],
+    "SCD-0024": [
+      "complex_tree",
+      "multi_branch",
+      "cyclic",
+      "batch_effect"
+    ],
+    "SCD-0025": [
+      "clusters",
+      "cyclic"
+    ],
+    "SCD-0026": [
+      "cyclic",
+      "complex_tree",
+      "batch_effect"
+    ],
+    "SCD-0027": [
+      "cyclic",
+      "complex_tree"
+    ],
+    "SCD-0028": [
+      "cyclic",
+      "multi_branch"
+    ],
+    "SCD-0029": [
+      "clusters",
+      "archetypal",
+      "multi_branch"
+    ],
+    "SCD-0030": [
+      "cyclic",
+      "multi_branch"
+    ],
+    "SCD-0033": [
+      "blob",
+      "batch_effect",
+      "complex_tree"
+    ],
+    "SCD-0045": [
+      "cyclic",
+      "complex_tree"
+    ],
+    "SCD-0046": [
+      "clusters",
+      "archetypal"
+    ],
+    "SCD-0047": [
+      "complex_tree",
+      "multi_branch",
+      "batch_effect"
+    ],
+    "SCD-0048": [
+      "multi_branch",
+      "complex_tree",
+      "batch_effect"
+    ],
+    "SCD-0049": [
+      "complex_tree",
+      "batch_effect"
+    ],
+    "SCD-0050": [
+      "bifurcation"
+    ],
+    "SCD-0051": [
+      "multi_branch"
+    ],
+    "SCD-0052": [
+      "clusters",
+      "multi_branch"
+    ],
+    "SCD-0053": [
+      "simple_traj"
+    ],
+    "SCD-0054": [
+      "simple_traj",
+      "bifurcation"
+    ],
+    "SCD-0055": [
+      "simple_traj",
+      "archetypal"
+    ],
+    "SCD-0056": [
+      "bifurcation",
+      "multi_branch"
+    ],
+    "SCD-0057": [
+      "simple_traj",
+      "archetypal"
+    ],
+    "SCD-0058": [
+      "multi_branch",
+      "bifurcation"
+    ],
+    "SCD-0059": [
+      "bifurcation",
+      "multi_branch"
+    ],
+    "SCD-0060": [
+      "simple_traj",
+      "bifurcation"
+    ],
+    "SCD-0061": [
+      "simple_traj"
+    ],
+    "SCD-0062": [
+      "bifurcation",
+      "multi_branch"
+    ],
+    "SCD-0063": [
+      "archetypal",
+      "surface"
+    ],
+    "SCD-0064": [
+      "multi_branch"
+    ],
+    "SCD-0065": [
+      "blob",
+      "multi_branch",
+      "outlier_dominated"
+    ],
+    "SCD-0066": [
+      "batch_effect",
+      "bifurcation"
+    ],
+    "SCD-0067": [
+      "simple_traj"
+    ],
+    "SCD-0068": [
+      "cyclic",
+      "archetypal",
+      "surface"
+    ],
+    "SCD-0069": [
+      "surface",
+      "archetypal",
+      "cyclic"
+    ],
+    "SCD-0070": [
+      "complex_tree",
+      "clusters"
+    ],
+    "SCD-0071": [
+      "complex_tree",
+      "blob",
+      "surface"
+    ],
+    "SCD-0072": [
+      "surface",
+      "cyclic",
+      "archetypal"
+    ],
+    "SCD-0073": [
+      "blob",
+      "complex_tree"
+    ],
+    "SCD-0074": [
+      "clusters",
+      "multi_branch"
+    ],
+    "SCD-0075": [
+      "clusters",
+      "simple_traj",
+      "multi_branch"
+    ],
+    "SCD-0076": [
+      "clusters",
+      "blob",
+      "batch_effect"
+    ],
+    "SCD-0077": [
+      "complex_tree",
+      "surface",
+      "archetypal"
+    ],
+    "SCD-0078": [
+      "cyclic",
+      "archetypal"
+    ],
+    "SCD-0079": [
+      "multi_branch",
+      "clusters",
+      "surface"
+    ],
+    "SCD-0080": [
+      "multi_branch",
+      "blob"
+    ],
+    "SCD-0081": [
+      "blob",
+      "simple_traj"
+    ],
+    "SCD-0082": [
+      "cyclic",
+      "archetypal",
+      "surface"
+    ],
+    "SCD-0083": [
+      "clusters",
+      "surface"
+    ],
+    "SCD-0084": [
+      "blob",
+      "surface"
+    ],
+    "SCD-0085": [
+      "archetypal",
+      "blob",
+      "cyclic"
+    ],
+    "SCD-0086": [
+      "cyclic",
+      "archetypal",
+      "surface"
+    ],
+    "SCD-0087": [
+      "blob",
+      "surface"
+    ],
+    "SCD-0088": [
+      "blob"
+    ],
+    "SCD-0089": [
+      "clusters",
+      "blob"
+    ],
+    "SCD-0090": [
+      "surface",
+      "complex_tree",
+      "cyclic"
+    ],
+    "SCD-0091": [
+      "archetypal",
+      "surface",
+      "cyclic"
+    ],
+    "SCD-0092": [
+      "clusters",
+      "cyclic",
+      "batch_effect"
+    ],
+    "SCD-0093": [
+      "clusters",
+      "multi_branch"
+    ],
+    "SCD-0094": [
+      "blob",
+      "archetypal",
+      "surface"
+    ],
+    "SCD-0095": [
+      "clusters",
+      "surface"
+    ],
+    "SCD-0096": [
+      "surface",
+      "archetypal"
+    ],
+    "SCD-0097": [
+      "surface",
+      "archetypal"
+    ],
+    "SCD-0098": [
+      "blob",
+      "archetypal"
+    ],
+    "SCD-0099": [
+      "blob",
+      "archetypal",
+      "simple_traj"
+    ],
+    "SCD-0100": [
+      "complex_tree",
+      "multi_branch",
+      "batch_effect"
+    ],
+    "SCD-0101": [
+      "cyclic",
+      "clusters",
+      "archetypal"
+    ],
+    "SCD-0102": [
+      "multi_branch",
+      "archetypal",
+      "surface"
+    ],
+    "SCD-0103": [
+      "clusters",
+      "complex_tree"
+    ],
+    "SCD-0104": [
+      "complex_tree",
+      "cyclic",
+      "multi_branch"
+    ],
+    "SCD-0105": [
+      "blob",
+      "surface",
+      "cyclic"
+    ],
+    "SCD-0106": [
+      "multi_branch",
+      "simple_traj"
+    ],
+    "SCD-0107": [
+      "blob",
+      "surface"
+    ],
+    "SCD-0108": [
+      "clusters",
+      "surface",
+      "batch_effect",
+      "multi_branch"
+    ],
+    "SCD-0109": [
+      "clusters",
+      "bifurcation",
+      "outlier_dominated"
+    ],
+    "SCD-0110": [
+      "cyclic",
+      "surface",
+      "blob"
+    ],
+    "SCD-0111": [
+      "surface",
+      "cyclic",
+      "blob"
+    ],
+    "SCD-0112": [
+      "blob",
+      "batch_effect",
+      "surface",
+      "cyclic"
+    ]
+  },
+  "annotations": {
+    "density": {
+      "SCD-0001": "low",
+      "SCD-0002": "medium",
+      "SCD-0003": "high",
+      "SCD-0004": "low",
+      "SCD-0005": "medium",
+      "SCD-0006": "low",
+      "SCD-0007": "low",
+      "SCD-0008": "low",
+      "SCD-0009": "low",
+      "SCD-0010": "medium",
+      "SCD-0011": "medium",
+      "SCD-0012": "medium",
+      "SCD-0013": "high",
+      "SCD-0014": "low",
+      "SCD-0015": "low",
+      "SCD-0016": "high",
+      "SCD-0017": "high",
+      "SCD-0018": "high",
+      "SCD-0019": "medium",
+      "SCD-0020": "high",
+      "SCD-0021": "medium",
+      "SCD-0022": "medium",
+      "SCD-0023": "medium",
+      "SCD-0024": "high",
+      "SCD-0026": "high",
+      "SCD-0025": "medium",
+      "SCD-0027": "high",
+      "SCD-0028": "high",
+      "SCD-0029": "high",
+      "SCD-0030": "medium",
+      "SCD-0033": "high",
+      "SCD-0045": "high",
+      "SCD-0046": "high",
+      "SCD-0047": "high",
+      "SCD-0048": "high",
+      "SCD-0049": "high",
+      "SCD-0050": "medium",
+      "SCD-0051": "high",
+      "SCD-0052": "medium",
+      "SCD-0053": "medium",
+      "SCD-0054": "medium",
+      "SCD-0055": "medium",
+      "SCD-0056": "low",
+      "SCD-0057": "low",
+      "SCD-0058": "low",
+      "SCD-0059": "medium",
+      "SCD-0060": "medium",
+      "SCD-0061": "high",
+      "SCD-0062": "medium",
+      "SCD-0063": "low",
+      "SCD-0064": "low",
+      "SCD-0065": "medium",
+      "SCD-0066": "medium",
+      "SCD-0067": "high",
+      "SCD-0068": "high",
+      "SCD-0069": "high",
+      "SCD-0070": "high",
+      "SCD-0071": "high",
+      "SCD-0072": "high",
+      "SCD-0073": "high",
+      "SCD-0074": "high",
+      "SCD-0075": "high",
+      "SCD-0076": "high",
+      "SCD-0077": "high",
+      "SCD-0078": "high",
+      "SCD-0079": "high",
+      "SCD-0080": "high",
+      "SCD-0081": "high",
+      "SCD-0082": "medium",
+      "SCD-0083": "high",
+      "SCD-0084": "high",
+      "SCD-0085": "high",
+      "SCD-0086": "medium",
+      "SCD-0087": "high",
+      "SCD-0088": "high",
+      "SCD-0089": "high",
+      "SCD-0090": "high",
+      "SCD-0091": "high",
+      "SCD-0092": "high",
+      "SCD-0093": "high",
+      "SCD-0094": "high",
+      "SCD-0095": "high",
+      "SCD-0096": "high",
+      "SCD-0097": "high",
+      "SCD-0098": "high",
+      "SCD-0099": "high",
+      "SCD-0100": "medium",
+      "SCD-0101": "high",
+      "SCD-0102": "medium",
+      "SCD-0103": "medium",
+      "SCD-0104": "high",
+      "SCD-0105": "high",
+      "SCD-0106": "high",
+      "SCD-0107": "high",
+      "SCD-0108": "high",
+      "SCD-0109": "high",
+      "SCD-0110": "high",
+      "SCD-0111": "high",
+      "SCD-0112": "high"
+    },
+    "quality": {
+      "SCD-0001": "good",
+      "SCD-0002": "good",
+      "SCD-0003": "good",
+      "SCD-0004": "good",
+      "SCD-0005": "good",
+      "SCD-0006": "poor",
+      "SCD-0007": "poor",
+      "SCD-0008": "good",
+      "SCD-0009": "good",
+      "SCD-0010": "good",
+      "SCD-0011": "good",
+      "SCD-0012": "good",
+      "SCD-0013": "poor",
+      "SCD-0014": "poor",
+      "SCD-0015": "poor",
+      "SCD-0016": "good",
+      "SCD-0017": "good",
+      "SCD-0018": "poor",
+      "SCD-0019": "good",
+      "SCD-0020": "good",
+      "SCD-0021": "poor",
+      "SCD-0022": "poor",
+      "SCD-0023": "good",
+      "SCD-0024": "good",
+      "SCD-0026": "poor",
+      "SCD-0025": "good",
+      "SCD-0027": "poor",
+      "SCD-0028": "good",
+      "SCD-0029": "good",
+      "SCD-0030": "poor",
+      "SCD-0033": "poor",
+      "SCD-0045": "good",
+      "SCD-0046": "poor",
+      "SCD-0047": "poor",
+      "SCD-0048": "poor",
+      "SCD-0049": "poor",
+      "SCD-0050": "good",
+      "SCD-0051": "poor",
+      "SCD-0052": "poor",
+      "SCD-0053": "poor",
+      "SCD-0054": "good",
+      "SCD-0055": "good",
+      "SCD-0056": "good",
+      "SCD-0057": "poor",
+      "SCD-0058": "good",
+      "SCD-0059": "poor",
+      "SCD-0060": "good",
+      "SCD-0061": "good",
+      "SCD-0062": "good",
+      "SCD-0063": "good",
+      "SCD-0064": "good",
+      "SCD-0065": "poor",
+      "SCD-0066": "poor",
+      "SCD-0067": "good",
+      "SCD-0068": "good",
+      "SCD-0069": "good",
+      "SCD-0070": "good",
+      "SCD-0071": "poor",
+      "SCD-0072": "excellent",
+      "SCD-0073": "poor",
+      "SCD-0074": "good",
+      "SCD-0075": "good",
+      "SCD-0076": "poor",
+      "SCD-0077": "good",
+      "SCD-0078": "good",
+      "SCD-0079": "good",
+      "SCD-0080": "poor",
+      "SCD-0081": "poor",
+      "SCD-0082": "good",
+      "SCD-0083": "good",
+      "SCD-0084": "good",
+      "SCD-0085": "poor",
+      "SCD-0086": "good",
+      "SCD-0087": "poor",
+      "SCD-0088": "poor",
+      "SCD-0089": "poor",
+      "SCD-0090": "good",
+      "SCD-0091": "good",
+      "SCD-0092": "poor",
+      "SCD-0093": "good",
+      "SCD-0094": "good",
+      "SCD-0095": "poor",
+      "SCD-0096": "excellent",
+      "SCD-0097": "good",
+      "SCD-0098": "poor",
+      "SCD-0099": "poor",
+      "SCD-0100": "poor",
+      "SCD-0101": "good",
+      "SCD-0102": "poor",
+      "SCD-0103": "poor",
+      "SCD-0104": "good",
+      "SCD-0105": "good",
+      "SCD-0106": "good",
+      "SCD-0107": "poor",
+      "SCD-0108": "poor",
+      "SCD-0109": "poor",
+      "SCD-0110": "good",
+      "SCD-0111": "good",
+      "SCD-0112": "poor"
+    }
+  },
+  "notes": {},
+  "flagged": {},
+  "exportedAt": "2026-05-04T02:31:12.044Z",
+  "totalLabeled": 99,
+  "totalFlagged": 0
+}
