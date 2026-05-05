@@ -84,6 +84,23 @@ Each file corresponds to a dataset sample and must contain a graph in PyTorch fo
 
 ---
 
+## 📥 Data
+
+Datasets are hosted on HuggingFace. Download them before running the benchmark:
+
+```bash
+pip install -e .
+python scripts/download_data.py --local-dir data/
+```
+
+This will populate `data/` with the raw cell shape samples. You can also specify a custom repo:
+
+```bash
+python scripts/download_data.py --repo-id your-username/scShapeBench --local-dir data/
+```
+
+---
+
 ## 🚀 Running the Benchmark
 
 Install the package:
@@ -92,10 +109,18 @@ Install the package:
 pip install -e .
 ```
 
-Run evaluation:
+Run evaluation on scRNA-seq data:
 
 ```bash
-python scripts/run_benchmark.py \
+python run_benchmark_single_cell.py \
+    --submission path/to/submission \
+    --output results/
+```
+
+Run evaluation on synthetic data:
+
+```bash
+python run_benchmark_synthetic.py \
     --submission path/to/submission \
     --output results/
 ```

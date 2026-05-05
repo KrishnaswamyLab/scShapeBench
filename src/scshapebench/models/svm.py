@@ -7,12 +7,11 @@ from scshapebench.datasets.labels import CLASS_ORDER
 
 
 class SVMModel:
-    name = "svm"
+    name             = "stats_svm"
+    features_source  = "graph_stats"
 
-    def __init__(self, C: float = 1.0, kernel: str = "rbf", gamma: str = "scale"):
+    def __init__(self, C: float = 1.0):
         self.C = C
-        self.kernel = kernel
-        self.gamma = gamma
         self._classifiers: dict = {}
 
     def fit(self, graphs, labels: np.ndarray, features: np.ndarray) -> None:
@@ -26,7 +25,7 @@ class SVMModel:
 
             clf = Pipeline([
                 ("scaler", StandardScaler()),
-                ("svm",    SVC(C=self.C, kernel=self.kernel, gamma=self.gamma, probability=True)),
+                ("svm",    SVC(C=self.C, kernel="linear", probability=True)),
             ])
             clf.fit(features, y)
             self._classifiers[cls_name] = clf

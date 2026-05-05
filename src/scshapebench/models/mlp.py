@@ -51,7 +51,8 @@ def _predict(model, loader, device):
 
 
 class MLPModel:
-    name = "mlp"
+    name            = "mlp"
+    features_source = "persistence"
 
     def __init__(self, device=None, hidden: int = 64, batch_size: int = 16,
                  lr: float = 1e-3, epochs: int = 100):

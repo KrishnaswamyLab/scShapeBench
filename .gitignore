@@ -38,3 +38,6 @@ htmlcov/
 results/
 phate_gallery_labels_*/
 submissions/
+submissions.zip
+benchmarks/scrnaseq/annotations.zip
+data/

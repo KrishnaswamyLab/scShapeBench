@@ -8,9 +8,11 @@ python scripts/make_labels.py [--min-annotators N]
 
 Output files (all written to benchmarks/scrnaseq/labels/)
 ----------------------------------------------------------
-majority_labels.json  -- label present if >50% of annotators assigned it (hard binary)
-union_labels.json     -- label present if >=1 annotator assigned it (broadest coverage)
-soft_labels.json      -- fraction of annotators that assigned each label (0.0-1.0)
+majority_labels.json     -- label present if >50% of annotators assigned it (hard binary)
+union_labels.json        -- label present if >=1 annotator assigned it (broadest coverage)
+soft_labels.json         -- fraction of annotators that assigned each label (0.0-1.0)
+confidence_labels.json   -- per-class confidence-weighted majority vote:
+                            S_k = sum_i c_i * 1{k in L_i}; active if S_k > 0.5 * sum_i c_i
 
 The script only includes SCD-XXXX datasets and skips any dataset annotated by fewer
 than --min-annotators annotators (default: 5).
@@ -30,6 +32,12 @@ Raw annotation labels are collapsed into 4 canonical classes before aggregation:
 Labels not listed (blob, batch_effect, outlier_dominated) are ignored.
 Each annotator contributes at most 1 vote per canonical class regardless of how many
 raw labels they assigned that map to the same canonical.
+
+Confidence scores
+-----------------
+ANNOTATOR_CONFIDENCE maps each annotator index i (matching annotation_i.json) to its
+self-reported confidence weight c_i used by the confidence_weighted aggregation mode.
+Update the values in that dict before running to reflect the actual reported scores.
 """
 
 import argparse
@@ -45,21 +53,36 @@ OUTPUT_DIR = REPO_ROOT / "benchmarks" / "scrnaseq" / "labels"
 sys.path.insert(0, str(REPO_ROOT / "src"))
 from scshapebench.datasets.labels import CLASS_ORDER, LABEL_MAP  # noqa: E402
 
+# Self-reported confidence scores, one per annotator file (annotation_i.json -> key i).
+# Replace placeholder values with the actual scores collected from annotators.
+ANNOTATOR_CONFIDENCE: dict[int, float] = {
+    0: 5.0,
+    1: 3.0,
+    2: 3.0,
+    3: 1.0,
+    4: 3.0,
+    5: 1.0,
+    6: 1.0,
+    7: 1.0,
+    8: 1.0,
+}
+
 MODE_FILENAME = {
     "majority": "majority_labels.json",
     "union": "union_labels.json",
     "soft": "soft_labels.json",
+    "confidence_weighted": "confidence_labels.json",
 }
 
 
-def load_all_annotations(annotations_dir: Path) -> dict[str, list[list[str]]]:
-    """Return {dataset_id: [labels_from_annotator_0, labels_from_annotator_1, ...]}."""
-    per_dataset: dict[str, list[list[str]]] = defaultdict(list)
-    for path in sorted(annotations_dir.glob("annotation_*.json")):
+def load_all_annotations(annotations_dir: Path) -> dict[str, list[tuple[int, list[str]]]]:
+    """Return {dataset_id: [(annotator_idx, labels), ...]}."""
+    per_dataset: dict[str, list[tuple[int, list[str]]]] = defaultdict(list)
+    for ann_idx, path in enumerate(sorted(annotations_dir.glob("annotation_*.json"))):
         with open(path) as f:
             data = json.load(f)
         for dataset_id, labels in data["labels"].items():
-            per_dataset[dataset_id].append(labels)
+            per_dataset[dataset_id].append((ann_idx, labels))
     return dict(per_dataset)
 
 
@@ -69,12 +92,25 @@ def map_labels(raw_labels: list[str]) -> set[str]:
 
 
 def aggregate_labels(
-    per_annotator: list[list[str]],
+    per_annotator: list[tuple[int, list[str]]],
     mode: str,
 ) -> list[float]:
     n = len(per_annotator)
+
+    if mode == "confidence_weighted":
+        # S_k = sum_i c_i * 1{k in L_i}; active if S_k > 0.5 * sum_i c_i
+        support: dict[str, float] = defaultdict(float)
+        total_weight = 0.0
+        for ann_idx, ann_labels in per_annotator:
+            weight = ANNOTATOR_CONFIDENCE[ann_idx]
+            total_weight += weight
+            for canonical in map_labels(ann_labels):
+                support[canonical] += weight
+        threshold = 0.5 * total_weight
+        return [1.0 if support[c] > threshold else 0.0 for c in CLASS_ORDER]
+
     counts: dict[str, int] = defaultdict(int)
-    for ann_labels in per_annotator:
+    for _, ann_labels in per_annotator:
         for canonical in map_labels(ann_labels):
             counts[canonical] += 1
 
@@ -106,6 +142,12 @@ def print_summary(
     for i, cls in enumerate(CLASS_ORDER):
         total = sum(label_matrix[str(j)][i] for j in range(n))
         print(f"    {cls:<22} {total:>5.1f}  ({100 * total / n:.1f}%)")
+
+    print(f"\n  Label-count distribution ({n} datasets):")
+    for k in range(len(CLASS_ORDER) + 1):
+        count = sum(1 for j in range(n) if sum(v > 0 for v in label_matrix[str(j)]) == k)
+        bar = "#" * count
+        print(f"    {k} label(s): {count:>4}  ({100 * count / n:5.1f}%)  {bar}")
 
 
 def main() -> None:
