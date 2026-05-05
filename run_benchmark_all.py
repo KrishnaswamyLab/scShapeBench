@@ -8,6 +8,7 @@ python run_benchmark_all.py --label-type confidence_score --splits splits/folds_
 """
 
 import argparse
+import csv
 import json
 import math
 from pathlib import Path
@@ -20,6 +21,7 @@ from scshapebench.evaluator.loader import load_graphs
 from scshapebench.evaluator.validator import validate_submission
 from scshapebench.evaluator.metrics import evaluate, aggregate
 from scshapebench.evaluator.io import save_results, store_result
+from scshapebench.evaluator.baselines import baseline_predictions
 from scshapebench.datasets.labels import load_labels
 from scshapebench.features.persistence import extract_features as extract_persistence_features
 from scshapebench.features.graph_stats import extract_features as extract_graph_features
@@ -37,9 +39,21 @@ LABEL_PATHS = {
     "majority": "benchmarks/scrnaseq/labels/majority_labels.json",
     "union": "benchmarks/scrnaseq/labels/union_labels.json",
     "confidence_score": "benchmarks/scrnaseq/labels/confidence_labels.json",
+    "high_support": "benchmarks/scrnaseq/labels/high_support_labels.json",
 }
 
-MODEL_ORDER = ("mlp", "stats_svm")
+MODEL_ORDER = ("gnn", "mlp", "stats_svm")
+CONSOLE_MODEL_ORDER = (
+    "baseline_all_zero",
+    "baseline_all_one",
+    "baseline_train_prevalence",
+    "baseline_random_prevalence",
+    "gnn",
+    "mlp",
+    "pi_svm",
+    "stats_svm",
+    "rf",
+)
 
 # column order within each model group in the LaTeX table
 _CLASS_LATEX_ORDER = [
@@ -97,6 +111,24 @@ def load_folds(splits_path: Path) -> list:
     return folds
 
 
+def _filter_split_ids(ids: list[str], available_ids: set[str], split_name: str) -> list[str]:
+    kept = [sid for sid in ids if sid in available_ids]
+    dropped = sorted(set(ids) - available_ids)
+    if dropped:
+        preview = ", ".join(dropped[:5])
+        suffix = "..." if len(dropped) > 5 else ""
+        print(f"    Dropped {len(dropped)} {split_name} ID(s) without both graph and label: {preview}{suffix}")
+    return kept
+
+
+def _set_model_seed(seed: int) -> None:
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(seed)
+
+
 def run_single(submission_dir: Path, label_type: str, output_dir: Path, device, splits_path: Path = None):
     print(f"\nRunning benchmark on {submission_dir.name} ...")
     graphs, metadata = load_graphs(submission_dir)
@@ -104,39 +136,55 @@ def run_single(submission_dir: Path, label_type: str, output_dir: Path, device, 
 
     labels, _, dataset_order = load_labels(path=LABEL_PATHS[label_type])
     id_to_idx = {sid: i for i, sid in enumerate(dataset_order)}
+    evaluable_ids = set(graphs) & set(dataset_order)
+    graph_only = sorted(set(graphs) - set(dataset_order))
+    label_only = sorted(set(dataset_order) - set(graphs))
+    if graph_only:
+        print(f"  Warning: excluding {len(graph_only)} graph(s) with no label: {', '.join(graph_only[:5])}")
+    if label_only:
+        print(f"  Warning: excluding {len(label_only)} label(s) with no graph: {', '.join(label_only[:5])}")
+    if not evaluable_ids:
+        raise ValueError(f"{submission_dir.name}: no dataset IDs have both graphs and labels.")
 
     if splits_path is not None:
         print(f"  Using predefined splits from {splits_path}")
         splits = load_folds(splits_path)
     else:
-        splits = make_folds(graphs, k=5, seed=42)
+        splits = make_folds({sid: graphs[sid] for sid in evaluable_ids}, k=5, seed=42)
     all_results = {}
 
     for fold_id, split in enumerate(splits):
         print(f"  Fold {fold_id} ...", end="\r")
-        train_ids = split["train"]
-        test_ids = split["test"]
+        train_ids = _filter_split_ids(split["train"], evaluable_ids, "train")
+        test_ids = _filter_split_ids(split["test"], evaluable_ids, "test")
 
-        train_graphs = [graphs[i] for i in train_ids if i in graphs]
-        test_graphs = [graphs[i] for i in test_ids if i in graphs]
+        train_graphs = [graphs[i] for i in train_ids]
+        test_graphs = [graphs[i] for i in test_ids]
+        train_labels = labels[[id_to_idx[i] for i in train_ids]]
+        test_labels = labels[[id_to_idx[i] for i in test_ids]]
 
-        num_classes = labels.shape[1]
-
-        def _gather(ids):
-            rows = []
-            for i in ids:
-                rows.append(labels[id_to_idx[i]] if i in id_to_idx else np.zeros(num_classes))
-            return np.stack(rows)
-
-        train_labels = _gather(train_ids)
-        test_labels = _gather(test_ids)
+        if len(train_graphs) != len(train_labels) or len(test_graphs) != len(test_labels):
+            raise RuntimeError("Internal ID alignment error between graphs and labels.")
 
         features_cache = {
             "persistence": extract_persistence_features(train_graphs, test_graphs),
             "graph_stats": extract_graph_features(train_graphs, test_graphs),
         }
 
-        for model in get_models(device):
+        for baseline_name, (preds, probs) in baseline_predictions(
+            train_labels=train_labels,
+            test_labels=test_labels,
+            seed=20_000 + fold_id,
+        ).items():
+            store_result(
+                all_results,
+                model_name=baseline_name,
+                fold_id=fold_id,
+                metrics=evaluate(test_labels, preds, probs),
+            )
+
+        for model_idx, model in enumerate(get_models(device)):
+            _set_model_seed(10_000 + fold_id * 100 + model_idx)
             src = model.features_source
             X_train_m, X_test_m = features_cache[src] if src else (None, None)
             model.fit(graphs=train_graphs, labels=train_labels, features=X_train_m)
@@ -156,13 +204,13 @@ def _print_comparison_table(all_method_results: list, label_type: str) -> None:
     print("\n" + sep)
     print(f"  BENCHMARK RESULTS {label_type} (mean over CV folds)")
     print(sep)
-    print(f"  {'Model':<10}  {'Method':<14}  {'Class':<24}  {'Acc':>15} {'F1':>15}  {'AUC':>15}")
+    print(f"  {'Model':<27}  {'Method':<14}  {'Class':<24}  {'Acc':>15} {'BalAcc':>15} {'F1':>15}  {'AUPRC':>15} {'AUC':>15}")
     print("  " + "-" * 84)
 
     for final_results, metadata in all_method_results:
         method = metadata.get("method", "unknown")
         first = True
-        for model_name in MODEL_ORDER:
+        for model_name in CONSOLE_MODEL_ORDER:
             if model_name not in final_results:
                 continue
             if not first:
@@ -173,9 +221,11 @@ def _print_comparison_table(all_method_results: list, label_type: str) -> None:
                     continue
                 r = final_results[model_name][cls_name]
                 acc = _fmt_pm(r.get("accuracy_mean", float("nan")), r.get("accuracy_std", float("nan")))
+                bal_acc = _fmt_pm(r.get("balanced_accuracy_mean", float("nan")), r.get("balanced_accuracy_std", float("nan")))
                 f1 = _fmt_pm(r.get("f1_mean", float("nan")), r.get("f1_std", float("nan")))
+                auprc = _fmt_pm(r.get("auprc_mean", float("nan")), r.get("auprc_std", float("nan")))
                 auc = _fmt_pm(r.get("auc_mean", float("nan")), r.get("auc_std", float("nan")))
-                print(f"  {model_name:<10}  {method:<14}  {display:<24} {acc:>15} {f1:>15}  {auc:>15}")
+                print(f"  {model_name:<27}  {method:<14}  {display:<24} {acc:>15} {bal_acc:>15} {f1:>15}  {auprc:>15} {auc:>15}")
 
         if (final_results, metadata) != all_method_results[-1]:
             print()
@@ -312,6 +362,146 @@ def _print_latex_table(
     print(f"LaTeX table saved to: {out_path}")
 
 
+def _print_baseline_latex_table(
+    all_method_results: list,
+    label_type: str,
+    out_path: Path,
+) -> None:
+    if not all_method_results:
+        return
+
+    first_results, _ = all_method_results[0]
+    baseline_order = (
+        "baseline_all_zero",
+        "baseline_all_one",
+        "baseline_train_prevalence",
+        "baseline_random_prevalence",
+    )
+    baseline_display = {
+        "baseline_all_zero": "All zero",
+        "baseline_all_one": "All one",
+        "baseline_train_prevalence": "Train prevalence",
+        "baseline_random_prevalence": "Random prevalence",
+    }
+
+    lines = []
+    lines.append(r"\begin{table}[H]")
+    lines.append(r"\centering")
+    lines.append(
+        rf"\caption{{Baseline performance on the scRNAseq track "
+        rf"(\textbf{{label type:}} {label_type}). Values are mean $\pm$ std over 5 CV folds.}}"
+    )
+    lines.append(r"\label{tab:scrnaseq-baselines}")
+    lines.append(r"\setlength{\tabcolsep}{4pt}")
+    lines.append(r"\resizebox{\textwidth}{!}{%")
+    lines.append(r"\begin{tabular}{l ccc ccc ccc ccc}")
+    lines.append(r"\toprule")
+    lines.append(
+        r"& \multicolumn{3}{c}{Cl} & \multicolumn{3}{c}{ST} & "
+        r"\multicolumn{3}{c}{MT} & \multicolumn{3}{c}{A} \\"
+    )
+    lines.append(
+        r"\cmidrule(lr){2-4} \cmidrule(lr){5-7} "
+        r"\cmidrule(lr){8-10} \cmidrule(lr){11-13}"
+    )
+    lines.append(
+        r"Baseline & Acc & F1 & AUPRC & Acc & F1 & AUPRC & "
+        r"Acc & F1 & AUPRC & Acc & F1 & AUPRC \\"
+    )
+    lines.append(r"\midrule")
+
+    for baseline in baseline_order:
+        if baseline not in first_results:
+            continue
+        cells = [baseline_display[baseline]]
+        for cls_name, _ in _CLASS_LATEX_ORDER:
+            r = first_results[baseline].get(cls_name, {})
+            for metric in ("accuracy", "f1", "auprc"):
+                cells.append(_fmt_latex_val(
+                    r.get(f"{metric}_mean", float("nan")),
+                    r.get(f"{metric}_std", float("nan")),
+                ))
+        lines.append(" & ".join(cells) + r" \\")
+
+    lines.append(r"\bottomrule")
+    lines.append(r"\end{tabular}%")
+    lines.append(r"}")
+    lines.append(r"\end{table}")
+
+    out_path.write_text("\n".join(lines) + "\n")
+    print(f"Baseline LaTeX table saved to: {out_path}")
+
+
+def _write_summary_csv(all_method_results: list, label_type: str, out_path: Path) -> None:
+    metric_names = (
+        "accuracy",
+        "balanced_accuracy",
+        "f1",
+        "auprc",
+        "auc",
+        "precision",
+        "recall",
+    )
+    summary_metric_names = (
+        "macro_accuracy",
+        "macro_balanced_accuracy",
+        "macro_f1",
+        "macro_auprc",
+        "macro_auc",
+        "macro_precision",
+        "macro_recall",
+        "micro_f1",
+        "micro_auprc",
+        "micro_auc",
+        "micro_precision",
+        "micro_recall",
+        "exact_match",
+    )
+
+    fieldnames = [
+        "label_type",
+        "method",
+        "model",
+        "class",
+        "metric",
+        "mean",
+        "std",
+    ]
+
+    with out_path.open("w", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=fieldnames)
+        writer.writeheader()
+        for final_results, metadata in all_method_results:
+            method = metadata.get("method", "unknown")
+            for model_name, model_results in final_results.items():
+                for cls_name in _CLASS_DISPLAY:
+                    if cls_name not in model_results:
+                        continue
+                    for metric in metric_names:
+                        writer.writerow({
+                            "label_type": label_type,
+                            "method": method,
+                            "model": model_name,
+                            "class": cls_name,
+                            "metric": metric,
+                            "mean": model_results[cls_name].get(f"{metric}_mean", float("nan")),
+                            "std": model_results[cls_name].get(f"{metric}_std", float("nan")),
+                        })
+                summary = model_results.get("__summary__", {})
+                for metric in summary_metric_names:
+                    writer.writerow({
+                        "label_type": label_type,
+                        "method": method,
+                        "model": model_name,
+                        "class": "__summary__",
+                        "metric": metric,
+                        "mean": summary.get(f"{metric}_mean", float("nan")),
+                        "std": summary.get(f"{metric}_std", float("nan")),
+                    })
+
+    print(f"CSV summary saved to: {out_path}")
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Run scShapeBench on all methods under submissions/scRNAseq/."
@@ -323,7 +513,7 @@ def main():
     )
     parser.add_argument(
         "--label-type",
-        choices=["majority", "confidence_score","union"],
+        choices=["majority", "confidence_score","union", "high_support"],
         default="confidence_score",
     )
     parser.add_argument("--output", default="results/", help="Directory to save per-method results")
@@ -376,6 +566,10 @@ def main():
     _print_comparison_table(all_method_results, args.label_type)
     latex_path = output_dir / f"table_{args.label_type}.txt"
     _print_latex_table(all_method_results, args.label_type, latex_path, our_method=args.our_method)
+    baseline_latex_path = output_dir / f"table_{args.label_type}_baselines.txt"
+    _print_baseline_latex_table(all_method_results, args.label_type, baseline_latex_path)
+    summary_csv_path = output_dir / f"summary_{args.label_type}.csv"
+    _write_summary_csv(all_method_results, args.label_type, summary_csv_path)
     print(f"Individual result files saved to: {output_dir}")
 
 

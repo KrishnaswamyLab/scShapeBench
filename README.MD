@@ -38,49 +38,33 @@ Everything else is fixed and controlled by the benchmark.
 
 ## 📦 Submission Format
 
-Users must provide a **submission directory** with the following structure:
+Users must provide a **submission directory** with one subdirectory per dataset:
 
 ```
 my_submission/
-├── metadata.json
-└── graphs/
-    ├── sample_000.pt
-    ├── sample_001.pt
-    └── ...
+├── SCD-0001/
+│   ├── nodes.csv
+│   ├── edges.csv
+│   ├── h0_finite.csv       # optional
+│   └── h1_essential.csv    # optional
+├── SCD-0002/
+│   ├── nodes.csv
+│   └── edges.csv
+└── ...
 ```
 
----
-
-### `metadata.json`
-
-```json
-{
-  "method_name": "my_graph_method",
-  "dataset_version": "v1",
-  "notes": "optional description"
-}
-```
-
----
-
-### Graph files (`.pt`)
-
-Each file corresponds to a dataset sample and must contain a graph in PyTorch format:
-
-```python
-{
-    "edge_index": LongTensor [2, E],
-    "x": FloatTensor [N, D],        # optional node features
-    "edge_attr": FloatTensor [E, D] # optional edge features
-}
-```
+Sample directories may also be named with trailing integers such as `1` or
+`SC-001`; the loader normalizes them to `SCD-0001`.
 
 **Requirements:**
 
 * One graph per sample
-* File names must match dataset sample IDs
-* No missing samples
+* Sample IDs must match benchmark dataset IDs after normalization
 * No NaNs or invalid values
+* `nodes.csv` columns: `id,x,y`
+* `edges.csv` columns: `source,target,length`
+* `h0_finite.csv` column: `death`, if persistence features are supplied
+* `h1_essential.csv` column: `birth`, if persistence features are supplied
 
 ---
 
@@ -114,6 +98,8 @@ Run evaluation on scRNA-seq data:
 ```bash
 python run_benchmark_single_cell.py \
     --submission path/to/submission \
+    --label-type confidence_score \
+    --splits splits/folds_v1.json \
     --output results/
 ```
 
@@ -184,6 +170,8 @@ scShapeBench enforces:
 * Fixed dataset splits
 * Fixed evaluation models
 * Deterministic evaluation pipeline
+* Explicit always-negative, always-positive, train-prevalence, and random-prevalence baselines
+* Strict graph/label ID alignment: unlabeled graphs and graphless labels are excluded from scoring and reported
 
 Users **cannot modify training or evaluation procedures**.
 

@@ -1,0 +1,1451 @@
+{
+  "class_order": [
+    "archetypal",
+    "multi_branch",
+    "simple_traj",
+    "clusters"
+  ],
+  "label_map": {
+    "clusters": "clusters",
+    "simple_traj": "simple_traj",
+    "cyclic": "simple_traj",
+    "bifurcation": "multi_branch",
+    "multi_branch": "multi_branch",
+    "complex_tree": "multi_branch",
+    "archetypal": "archetypal",
+    "surface": "archetypal"
+  },
+  "aggregation": "raw_annotator_support_at_least_5_of_9",
+  "source_agreement_file": "/home/drew/Projects/dreeb/annotations/annotation_agreement_groups/per_dataset_agreement_summary.csv",
+  "filter": "keep SCD datasets with max canonical support >= 5; label class active when support >= 5",
+  "min_support": 5,
+  "num_annotators": 9,
+  "dataset_order": [
+    "SCD-0001",
+    "SCD-0002",
+    "SCD-0003",
+    "SCD-0004",
+    "SCD-0005",
+    "SCD-0006",
+    "SCD-0007",
+    "SCD-0008",
+    "SCD-0009",
+    "SCD-0010",
+    "SCD-0011",
+    "SCD-0012",
+    "SCD-0014",
+    "SCD-0015",
+    "SCD-0016",
+    "SCD-0017",
+    "SCD-0018",
+    "SCD-0021",
+    "SCD-0022",
+    "SCD-0023",
+    "SCD-0027",
+    "SCD-0028",
+    "SCD-0029",
+    "SCD-0033",
+    "SCD-0045",
+    "SCD-0046",
+    "SCD-0047",
+    "SCD-0048",
+    "SCD-0049",
+    "SCD-0050",
+    "SCD-0051",
+    "SCD-0052",
+    "SCD-0053",
+    "SCD-0054",
+    "SCD-0055",
+    "SCD-0056",
+    "SCD-0057",
+    "SCD-0058",
+    "SCD-0059",
+    "SCD-0060",
+    "SCD-0061",
+    "SCD-0062",
+    "SCD-0064",
+    "SCD-0065",
+    "SCD-0066",
+    "SCD-0067",
+    "SCD-0068",
+    "SCD-0069",
+    "SCD-0070",
+    "SCD-0071",
+    "SCD-0072",
+    "SCD-0074",
+    "SCD-0075",
+    "SCD-0077",
+    "SCD-0079",
+    "SCD-0080",
+    "SCD-0081",
+    "SCD-0084",
+    "SCD-0085",
+    "SCD-0086",
+    "SCD-0089",
+    "SCD-0091",
+    "SCD-0093",
+    "SCD-0094",
+    "SCD-0096",
+    "SCD-0097",
+    "SCD-0098",
+    "SCD-0100",
+    "SCD-0101",
+    "SCD-0102",
+    "SCD-0103",
+    "SCD-0104",
+    "SCD-0105",
+    "SCD-0106",
+    "SCD-0107",
+    "SCD-0108",
+    "SCD-0109",
+    "SCD-0110",
+    "SCD-0111"
+  ],
+  "labels": {
+    "0": [
+      0.0,
+      1.0,
+      0.0,
+      0.0
+    ],
+    "1": [
+      1.0,
+      0.0,
+      1.0,
+      0.0
+    ],
+    "2": [
+      0.0,
+      1.0,
+      0.0,
+      0.0
+    ],
+    "3": [
+      0.0,
+      0.0,
+      1.0,
+      0.0
+    ],
+    "4": [
+      0.0,
+      0.0,
+      1.0,
+      0.0
+    ],
+    "5": [
+      0.0,
+      0.0,
+      1.0,
+      0.0
+    ],
+    "6": [
+      0.0,
+      1.0,
+      0.0,
+      0.0
+    ],
+    "7": [
+      0.0,
+      0.0,
+      1.0,
+      0.0
+    ],
+    "8": [
+      0.0,
+      0.0,
+      1.0,
+      0.0
+    ],
+    "9": [
+      0.0,
+      1.0,
+      0.0,
+      0.0
+    ],
+    "10": [
+      1.0,
+      1.0,
+      0.0,
+      0.0
+    ],
+    "11": [
+      1.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "12": [
+      1.0,
+      0.0,
+      0.0,
+      1.0
+    ],
+    "13": [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+    ],
+    "14": [
+      1.0,
+      1.0,
+      0.0,
+      0.0
+    ],
+    "15": [
+      0.0,
+      1.0,
+      0.0,
+      0.0
+    ],
+    "16": [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+    ],
+    "17": [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+    ],
+    "18": [
+      0.0,
+      1.0,
+      1.0,
+      0.0
+    ],
+    "19": [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+    ],
+    "20": [
+      0.0,
+      1.0,
+      0.0,
+      0.0
+    ],
+    "21": [
+      0.0,
+      1.0,
+      0.0,
+      1.0
+    ],
+    "22": [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+    ],
+    "23": [
+      0.0,
+      1.0,
+      0.0,
+      0.0
+    ],
+    "24": [
+      0.0,
+      1.0,
+      0.0,
+      0.0
+    ],
+    "25": [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+    ],
+    "26": [
+      0.0,
+      1.0,
+      0.0,
+      0.0
+    ],
+    "27": [
+      0.0,
+      1.0,
+      0.0,
+      0.0
+    ],
+    "28": [
+      0.0,
+      1.0,
+      0.0,
+      0.0
+    ],
+    "29": [
+      0.0,
+      1.0,
+      0.0,
+      0.0
+    ],
+    "30": [
+      0.0,
+      1.0,
+      0.0,
+      0.0
+    ],
+    "31": [
+      0.0,
+      1.0,
+      0.0,
+      0.0
+    ],
+    "32": [
+      0.0,
+      0.0,
+      1.0,
+      0.0
+    ],
+    "33": [
+      0.0,
+      0.0,
+      1.0,
+      0.0
+    ],
+    "34": [
+      1.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "35": [
+      0.0,
+      1.0,
+      0.0,
+      0.0
+    ],
+    "36": [
+      0.0,
+      0.0,
+      1.0,
+      0.0
+    ],
+    "37": [
+      0.0,
+      1.0,
+      0.0,
+      0.0
+    ],
+    "38": [
+      0.0,
+      1.0,
+      0.0,
+      0.0
+    ],
+    "39": [
+      0.0,
+      0.0,
+      1.0,
+      0.0
+    ],
+    "40": [
+      0.0,
+      0.0,
+      1.0,
+      0.0
+    ],
+    "41": [
+      0.0,
+      1.0,
+      0.0,
+      0.0
+    ],
+    "42": [
+      0.0,
+      1.0,
+      0.0,
+      0.0
+    ],
+    "43": [
+      0.0,
+      1.0,
+      0.0,
+      0.0
+    ],
+    "44": [
+      0.0,
+      0.0,
+      1.0,
+      0.0
+    ],
+    "45": [
+      0.0,
+      0.0,
+      1.0,
+      0.0
+    ],
+    "46": [
+      0.0,
+      0.0,
+      1.0,
+      0.0
+    ],
+    "47": [
+      1.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "48": [
+      0.0,
+      1.0,
+      0.0,
+      1.0
+    ],
+    "49": [
+      0.0,
+      1.0,
+      0.0,
+      0.0
+    ],
+    "50": [
+      0.0,
+      1.0,
+      0.0,
+      0.0
+    ],
+    "51": [
+      0.0,
+      1.0,
+      0.0,
+      1.0
+    ],
+    "52": [
+      0.0,
+      1.0,
+      0.0,
+      0.0
+    ],
+    "53": [
+      0.0,
+      1.0,
+      0.0,
+      0.0
+    ],
+    "54": [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+    ],
+    "55": [
+      0.0,
+      1.0,
+      0.0,
+      0.0
+    ],
+    "56": [
+      0.0,
+      1.0,
+      0.0,
+      0.0
+    ],
+    "57": [
+      1.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "58": [
+      1.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "59": [
+      1.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "60": [
+      0.0,
+      1.0,
+      0.0,
+      1.0
+    ],
+    "61": [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+    ],
+    "62": [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+    ],
+    "63": [
+      1.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "64": [
+      1.0,
+      0.0,
+      1.0,
+      0.0
+    ],
+    "65": [
+      1.0,
+      0.0,
+      1.0,
+      0.0
+    ],
+    "66": [
+      1.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "67": [
+      0.0,
+      1.0,
+      0.0,
+      0.0
+    ],
+    "68": [
+      0.0,
+      1.0,
+      0.0,
+      1.0
+    ],
+    "69": [
+      0.0,
+      1.0,
+      0.0,
+      0.0
+    ],
+    "70": [
+      0.0,
+      1.0,
+      0.0,
+      1.0
+    ],
+    "71": [
+      0.0,
+      1.0,
+      0.0,
+      1.0
+    ],
+    "72": [
+      1.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "73": [
+      0.0,
+      1.0,
+      0.0,
+      0.0
+    ],
+    "74": [
+      1.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "75": [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+    ],
+    "76": [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+    ],
+    "77": [
+      0.0,
+      0.0,
+      1.0,
+      0.0
+    ],
+    "78": [
+      0.0,
+      1.0,
+      0.0,
+      0.0
+    ]
+  },
+  "agreement_metadata": {
+    "SCD-0001": {
+      "consensus_level": "medium",
+      "largest_group_label_set": "multi_branch",
+      "largest_group_size": 5,
+      "largest_group_fraction": 0.5555555555555556,
+      "mean_pairwise_jaccard": 0.5601851851851852,
+      "support_clusters": 1,
+      "support_simple_traj": 0,
+      "support_multi_branch": 8,
+      "support_archetypal": 3
+    },
+    "SCD-0002": {
+      "consensus_level": "low",
+      "largest_group_label_set": "archetypal",
+      "largest_group_size": 3,
+      "largest_group_fraction": 0.3333333333333333,
+      "mean_pairwise_jaccard": 0.3935185185185185,
+      "support_clusters": 0,
+      "support_simple_traj": 5,
+      "support_multi_branch": 2,
+      "support_archetypal": 6
+    },
+    "SCD-0003": {
+      "consensus_level": "high",
+      "largest_group_label_set": "multi_branch",
+      "largest_group_size": 6,
+      "largest_group_fraction": 0.6666666666666666,
+      "mean_pairwise_jaccard": 0.712962962962963,
+      "support_clusters": 1,
+      "support_simple_traj": 2,
+      "support_multi_branch": 9,
+      "support_archetypal": 0
+    },
+    "SCD-0004": {
+      "consensus_level": "high",
+      "largest_group_label_set": "simple_traj",
+      "largest_group_size": 7,
+      "largest_group_fraction": 0.7777777777777778,
+      "mean_pairwise_jaccard": 0.787037037037037,
+      "support_clusters": 1,
+      "support_simple_traj": 9,
+      "support_multi_branch": 1,
+      "support_archetypal": 0
+    },
+    "SCD-0005": {
+      "consensus_level": "high",
+      "largest_group_label_set": "simple_traj",
+      "largest_group_size": 7,
+      "largest_group_fraction": 0.7777777777777778,
+      "mean_pairwise_jaccard": 0.787037037037037,
+      "support_clusters": 1,
+      "support_simple_traj": 9,
+      "support_multi_branch": 1,
+      "support_archetypal": 0
+    },
+    "SCD-0006": {
+      "consensus_level": "medium",
+      "largest_group_label_set": "simple_traj",
+      "largest_group_size": 6,
+      "largest_group_fraction": 0.6666666666666666,
+      "mean_pairwise_jaccard": 0.4444444444444444,
+      "support_clusters": 0,
+      "support_simple_traj": 6,
+      "support_multi_branch": 0,
+      "support_archetypal": 2
+    },
+    "SCD-0007": {
+      "consensus_level": "medium",
+      "largest_group_label_set": "multi_branch",
+      "largest_group_size": 6,
+      "largest_group_fraction": 0.6666666666666666,
+      "mean_pairwise_jaccard": 0.6388888888888888,
+      "support_clusters": 0,
+      "support_simple_traj": 0,
+      "support_multi_branch": 8,
+      "support_archetypal": 3
+    },
+    "SCD-0008": {
+      "consensus_level": "medium",
+      "largest_group_label_set": "simple_traj",
+      "largest_group_size": 6,
+      "largest_group_fraction": 0.6666666666666666,
+      "mean_pairwise_jaccard": 0.6064814814814814,
+      "support_clusters": 1,
+      "support_simple_traj": 8,
+      "support_multi_branch": 2,
+      "support_archetypal": 0
+    },
+    "SCD-0009": {
+      "consensus_level": "medium",
+      "largest_group_label_set": "simple_traj",
+      "largest_group_size": 5,
+      "largest_group_fraction": 0.5555555555555556,
+      "mean_pairwise_jaccard": 0.45370370370370366,
+      "support_clusters": 2,
+      "support_simple_traj": 7,
+      "support_multi_branch": 2,
+      "support_archetypal": 0
+    },
+    "SCD-0010": {
+      "consensus_level": "high",
+      "largest_group_label_set": "multi_branch",
+      "largest_group_size": 8,
+      "largest_group_fraction": 0.8888888888888888,
+      "mean_pairwise_jaccard": 0.8888888888888888,
+      "support_clusters": 0,
+      "support_simple_traj": 0,
+      "support_multi_branch": 9,
+      "support_archetypal": 1
+    },
+    "SCD-0011": {
+      "consensus_level": "low",
+      "largest_group_label_set": "archetypal+multi_branch",
+      "largest_group_size": 3,
+      "largest_group_fraction": 0.3333333333333333,
+      "mean_pairwise_jaccard": 0.3148148148148148,
+      "support_clusters": 1,
+      "support_simple_traj": 3,
+      "support_multi_branch": 5,
+      "support_archetypal": 5
+    },
+    "SCD-0012": {
+      "consensus_level": "medium",
+      "largest_group_label_set": "archetypal",
+      "largest_group_size": 6,
+      "largest_group_fraction": 0.6666666666666666,
+      "mean_pairwise_jaccard": 0.5925925925925926,
+      "support_clusters": 1,
+      "support_simple_traj": 1,
+      "support_multi_branch": 1,
+      "support_archetypal": 8
+    },
+    "SCD-0014": {
+      "consensus_level": "medium",
+      "largest_group_label_set": "archetypal+clusters",
+      "largest_group_size": 5,
+      "largest_group_fraction": 0.5555555555555556,
+      "mean_pairwise_jaccard": 0.49074074074074076,
+      "support_clusters": 8,
+      "support_simple_traj": 1,
+      "support_multi_branch": 2,
+      "support_archetypal": 5
+    },
+    "SCD-0015": {
+      "consensus_level": "low",
+      "largest_group_label_set": "clusters",
+      "largest_group_size": 4,
+      "largest_group_fraction": 0.4444444444444444,
+      "mean_pairwise_jaccard": 0.32407407407407407,
+      "support_clusters": 5,
+      "support_simple_traj": 4,
+      "support_multi_branch": 1,
+      "support_archetypal": 2
+    },
+    "SCD-0016": {
+      "consensus_level": "low",
+      "largest_group_label_set": "archetypal",
+      "largest_group_size": 2,
+      "largest_group_fraction": 0.2222222222222222,
+      "mean_pairwise_jaccard": 0.3611111111111111,
+      "support_clusters": 3,
+      "support_simple_traj": 1,
+      "support_multi_branch": 6,
+      "support_archetypal": 5
+    },
+    "SCD-0017": {
+      "consensus_level": "low",
+      "largest_group_label_set": "archetypal",
+      "largest_group_size": 2,
+      "largest_group_fraction": 0.2222222222222222,
+      "mean_pairwise_jaccard": 0.28935185185185186,
+      "support_clusters": 4,
+      "support_simple_traj": 1,
+      "support_multi_branch": 5,
+      "support_archetypal": 4
+    },
+    "SCD-0018": {
+      "consensus_level": "low",
+      "largest_group_label_set": "archetypal",
+      "largest_group_size": 2,
+      "largest_group_fraction": 0.2222222222222222,
+      "mean_pairwise_jaccard": 0.3425925925925926,
+      "support_clusters": 6,
+      "support_simple_traj": 0,
+      "support_multi_branch": 3,
+      "support_archetypal": 4
+    },
+    "SCD-0021": {
+      "consensus_level": "low",
+      "largest_group_label_set": "clusters",
+      "largest_group_size": 4,
+      "largest_group_fraction": 0.4444444444444444,
+      "mean_pairwise_jaccard": 0.3148148148148148,
+      "support_clusters": 6,
+      "support_simple_traj": 2,
+      "support_multi_branch": 2,
+      "support_archetypal": 0
+    },
+    "SCD-0022": {
+      "consensus_level": "low",
+      "largest_group_label_set": "multi_branch",
+      "largest_group_size": 2,
+      "largest_group_fraction": 0.2222222222222222,
+      "mean_pairwise_jaccard": 0.34953703703703703,
+      "support_clusters": 3,
+      "support_simple_traj": 5,
+      "support_multi_branch": 6,
+      "support_archetypal": 1
+    },
+    "SCD-0023": {
+      "consensus_level": "low",
+      "largest_group_label_set": "multi_branch",
+      "largest_group_size": 3,
+      "largest_group_fraction": 0.3333333333333333,
+      "mean_pairwise_jaccard": 0.2546296296296296,
+      "support_clusters": 5,
+      "support_simple_traj": 1,
+      "support_multi_branch": 4,
+      "support_archetypal": 2
+    },
+    "SCD-0027": {
+      "consensus_level": "low",
+      "largest_group_label_set": "multi_branch+simple_traj",
+      "largest_group_size": 3,
+      "largest_group_fraction": 0.3333333333333333,
+      "mean_pairwise_jaccard": 0.2592592592592593,
+      "support_clusters": 2,
+      "support_simple_traj": 4,
+      "support_multi_branch": 5,
+      "support_archetypal": 3
+    },
+    "SCD-0028": {
+      "consensus_level": "low",
+      "largest_group_label_set": "archetypal+clusters",
+      "largest_group_size": 2,
+      "largest_group_fraction": 0.2222222222222222,
+      "mean_pairwise_jaccard": 0.2685185185185185,
+      "support_clusters": 5,
+      "support_simple_traj": 2,
+      "support_multi_branch": 5,
+      "support_archetypal": 2
+    },
+    "SCD-0029": {
+      "consensus_level": "low",
+      "largest_group_label_set": "clusters",
+      "largest_group_size": 4,
+      "largest_group_fraction": 0.4444444444444444,
+      "mean_pairwise_jaccard": 0.3611111111111111,
+      "support_clusters": 6,
+      "support_simple_traj": 0,
+      "support_multi_branch": 4,
+      "support_archetypal": 2
+    },
+    "SCD-0033": {
+      "consensus_level": "low",
+      "largest_group_label_set": "multi_branch",
+      "largest_group_size": 4,
+      "largest_group_fraction": 0.4444444444444444,
+      "mean_pairwise_jaccard": 0.2592592592592593,
+      "support_clusters": 2,
+      "support_simple_traj": 1,
+      "support_multi_branch": 5,
+      "support_archetypal": 1
+    },
+    "SCD-0045": {
+      "consensus_level": "low",
+      "largest_group_label_set": "multi_branch",
+      "largest_group_size": 4,
+      "largest_group_fraction": 0.4444444444444444,
+      "mean_pairwise_jaccard": 0.3287037037037037,
+      "support_clusters": 1,
+      "support_simple_traj": 2,
+      "support_multi_branch": 6,
+      "support_archetypal": 2
+    },
+    "SCD-0046": {
+      "consensus_level": "low",
+      "largest_group_label_set": "clusters",
+      "largest_group_size": 4,
+      "largest_group_fraction": 0.4444444444444444,
+      "mean_pairwise_jaccard": 0.3333333333333333,
+      "support_clusters": 6,
+      "support_simple_traj": 0,
+      "support_multi_branch": 2,
+      "support_archetypal": 3
+    },
+    "SCD-0047": {
+      "consensus_level": "medium",
+      "largest_group_label_set": "multi_branch",
+      "largest_group_size": 5,
+      "largest_group_fraction": 0.5555555555555556,
+      "mean_pairwise_jaccard": 0.5277777777777778,
+      "support_clusters": 4,
+      "support_simple_traj": 0,
+      "support_multi_branch": 7,
+      "support_archetypal": 0
+    },
+    "SCD-0048": {
+      "consensus_level": "medium",
+      "largest_group_label_set": "multi_branch",
+      "largest_group_size": 5,
+      "largest_group_fraction": 0.5555555555555556,
+      "mean_pairwise_jaccard": 0.5277777777777778,
+      "support_clusters": 4,
+      "support_simple_traj": 0,
+      "support_multi_branch": 7,
+      "support_archetypal": 0
+    },
+    "SCD-0049": {
+      "consensus_level": "low",
+      "largest_group_label_set": "multi_branch",
+      "largest_group_size": 4,
+      "largest_group_fraction": 0.4444444444444444,
+      "mean_pairwise_jaccard": 0.3564814814814815,
+      "support_clusters": 2,
+      "support_simple_traj": 1,
+      "support_multi_branch": 6,
+      "support_archetypal": 4
+    },
+    "SCD-0050": {
+      "consensus_level": "medium",
+      "largest_group_label_set": "multi_branch",
+      "largest_group_size": 6,
+      "largest_group_fraction": 0.6666666666666666,
+      "mean_pairwise_jaccard": 0.4444444444444444,
+      "support_clusters": 0,
+      "support_simple_traj": 1,
+      "support_multi_branch": 6,
+      "support_archetypal": 0
+    },
+    "SCD-0051": {
+      "consensus_level": "high",
+      "largest_group_label_set": "multi_branch",
+      "largest_group_size": 7,
+      "largest_group_fraction": 0.7777777777777778,
+      "mean_pairwise_jaccard": 0.6111111111111112,
+      "support_clusters": 0,
+      "support_simple_traj": 0,
+      "support_multi_branch": 7,
+      "support_archetypal": 0
+    },
+    "SCD-0052": {
+      "consensus_level": "medium",
+      "largest_group_label_set": "multi_branch",
+      "largest_group_size": 5,
+      "largest_group_fraction": 0.5555555555555556,
+      "mean_pairwise_jaccard": 0.4722222222222222,
+      "support_clusters": 2,
+      "support_simple_traj": 0,
+      "support_multi_branch": 7,
+      "support_archetypal": 0
+    },
+    "SCD-0053": {
+      "consensus_level": "high",
+      "largest_group_label_set": "simple_traj",
+      "largest_group_size": 7,
+      "largest_group_fraction": 0.7777777777777778,
+      "mean_pairwise_jaccard": 0.6111111111111112,
+      "support_clusters": 0,
+      "support_simple_traj": 7,
+      "support_multi_branch": 0,
+      "support_archetypal": 0
+    },
+    "SCD-0054": {
+      "consensus_level": "low",
+      "largest_group_label_set": "EMPTY",
+      "largest_group_size": 3,
+      "largest_group_fraction": 0.3333333333333333,
+      "mean_pairwise_jaccard": 0.2685185185185185,
+      "support_clusters": 1,
+      "support_simple_traj": 5,
+      "support_multi_branch": 3,
+      "support_archetypal": 0
+    },
+    "SCD-0055": {
+      "consensus_level": "low",
+      "largest_group_label_set": "archetypal",
+      "largest_group_size": 3,
+      "largest_group_fraction": 0.3333333333333333,
+      "mean_pairwise_jaccard": 0.3148148148148148,
+      "support_clusters": 0,
+      "support_simple_traj": 2,
+      "support_multi_branch": 4,
+      "support_archetypal": 5
+    },
+    "SCD-0056": {
+      "consensus_level": "medium",
+      "largest_group_label_set": "multi_branch",
+      "largest_group_size": 5,
+      "largest_group_fraction": 0.5555555555555556,
+      "mean_pairwise_jaccard": 0.4722222222222222,
+      "support_clusters": 0,
+      "support_simple_traj": 3,
+      "support_multi_branch": 7,
+      "support_archetypal": 0
+    },
+    "SCD-0057": {
+      "consensus_level": "low",
+      "largest_group_label_set": "simple_traj",
+      "largest_group_size": 4,
+      "largest_group_fraction": 0.4444444444444444,
+      "mean_pairwise_jaccard": 0.3148148148148148,
+      "support_clusters": 1,
+      "support_simple_traj": 5,
+      "support_multi_branch": 3,
+      "support_archetypal": 2
+    },
+    "SCD-0058": {
+      "consensus_level": "high",
+      "largest_group_label_set": "multi_branch",
+      "largest_group_size": 8,
+      "largest_group_fraction": 0.8888888888888888,
+      "mean_pairwise_jaccard": 0.8888888888888888,
+      "support_clusters": 0,
+      "support_simple_traj": 1,
+      "support_multi_branch": 9,
+      "support_archetypal": 0
+    },
+    "SCD-0059": {
+      "consensus_level": "medium",
+      "largest_group_label_set": "multi_branch",
+      "largest_group_size": 5,
+      "largest_group_fraction": 0.5555555555555556,
+      "mean_pairwise_jaccard": 0.4398148148148148,
+      "support_clusters": 0,
+      "support_simple_traj": 4,
+      "support_multi_branch": 6,
+      "support_archetypal": 1
+    },
+    "SCD-0060": {
+      "consensus_level": "low",
+      "largest_group_label_set": "simple_traj",
+      "largest_group_size": 3,
+      "largest_group_fraction": 0.3333333333333333,
+      "mean_pairwise_jaccard": 0.33796296296296297,
+      "support_clusters": 0,
+      "support_simple_traj": 6,
+      "support_multi_branch": 4,
+      "support_archetypal": 1
+    },
+    "SCD-0061": {
+      "consensus_level": "low",
+      "largest_group_label_set": "simple_traj",
+      "largest_group_size": 4,
+      "largest_group_fraction": 0.4444444444444444,
+      "mean_pairwise_jaccard": 0.3888888888888889,
+      "support_clusters": 1,
+      "support_simple_traj": 7,
+      "support_multi_branch": 1,
+      "support_archetypal": 1
+    },
+    "SCD-0062": {
+      "consensus_level": "medium",
+      "largest_group_label_set": "multi_branch",
+      "largest_group_size": 5,
+      "largest_group_fraction": 0.5555555555555556,
+      "mean_pairwise_jaccard": 0.4027777777777778,
+      "support_clusters": 0,
+      "support_simple_traj": 3,
+      "support_multi_branch": 6,
+      "support_archetypal": 0
+    },
+    "SCD-0064": {
+      "consensus_level": "high",
+      "largest_group_label_set": "multi_branch",
+      "largest_group_size": 8,
+      "largest_group_fraction": 0.8888888888888888,
+      "mean_pairwise_jaccard": 0.8888888888888888,
+      "support_clusters": 0,
+      "support_simple_traj": 1,
+      "support_multi_branch": 9,
+      "support_archetypal": 0
+    },
+    "SCD-0065": {
+      "consensus_level": "medium",
+      "largest_group_label_set": "multi_branch",
+      "largest_group_size": 5,
+      "largest_group_fraction": 0.5555555555555556,
+      "mean_pairwise_jaccard": 0.4351851851851852,
+      "support_clusters": 1,
+      "support_simple_traj": 2,
+      "support_multi_branch": 7,
+      "support_archetypal": 1
+    },
+    "SCD-0066": {
+      "consensus_level": "low",
+      "largest_group_label_set": "simple_traj",
+      "largest_group_size": 4,
+      "largest_group_fraction": 0.4444444444444444,
+      "mean_pairwise_jaccard": 0.3888888888888889,
+      "support_clusters": 0,
+      "support_simple_traj": 6,
+      "support_multi_branch": 4,
+      "support_archetypal": 0
+    },
+    "SCD-0067": {
+      "consensus_level": "medium",
+      "largest_group_label_set": "simple_traj",
+      "largest_group_size": 5,
+      "largest_group_fraction": 0.5555555555555556,
+      "mean_pairwise_jaccard": 0.3888888888888889,
+      "support_clusters": 0,
+      "support_simple_traj": 6,
+      "support_multi_branch": 2,
+      "support_archetypal": 0
+    },
+    "SCD-0068": {
+      "consensus_level": "medium",
+      "largest_group_label_set": "simple_traj",
+      "largest_group_size": 5,
+      "largest_group_fraction": 0.5555555555555556,
+      "mean_pairwise_jaccard": 0.4351851851851852,
+      "support_clusters": 1,
+      "support_simple_traj": 7,
+      "support_multi_branch": 1,
+      "support_archetypal": 2
+    },
+    "SCD-0069": {
+      "consensus_level": "low",
+      "largest_group_label_set": "archetypal",
+      "largest_group_size": 3,
+      "largest_group_fraction": 0.3333333333333333,
+      "mean_pairwise_jaccard": 0.33796296296296297,
+      "support_clusters": 1,
+      "support_simple_traj": 2,
+      "support_multi_branch": 2,
+      "support_archetypal": 7
+    },
+    "SCD-0070": {
+      "consensus_level": "low",
+      "largest_group_label_set": "clusters",
+      "largest_group_size": 3,
+      "largest_group_fraction": 0.3333333333333333,
+      "mean_pairwise_jaccard": 0.3611111111111111,
+      "support_clusters": 5,
+      "support_simple_traj": 0,
+      "support_multi_branch": 5,
+      "support_archetypal": 0
+    },
+    "SCD-0071": {
+      "consensus_level": "medium",
+      "largest_group_label_set": "multi_branch",
+      "largest_group_size": 4,
+      "largest_group_fraction": 0.4444444444444444,
+      "mean_pairwise_jaccard": 0.4074074074074074,
+      "support_clusters": 1,
+      "support_simple_traj": 0,
+      "support_multi_branch": 7,
+      "support_archetypal": 2
+    },
+    "SCD-0072": {
+      "consensus_level": "low",
+      "largest_group_label_set": "archetypal+multi_branch",
+      "largest_group_size": 2,
+      "largest_group_fraction": 0.2222222222222222,
+      "mean_pairwise_jaccard": 0.3101851851851852,
+      "support_clusters": 1,
+      "support_simple_traj": 3,
+      "support_multi_branch": 6,
+      "support_archetypal": 4
+    },
+    "SCD-0074": {
+      "consensus_level": "low",
+      "largest_group_label_set": "clusters+multi_branch",
+      "largest_group_size": 3,
+      "largest_group_fraction": 0.3333333333333333,
+      "mean_pairwise_jaccard": 0.2685185185185185,
+      "support_clusters": 5,
+      "support_simple_traj": 1,
+      "support_multi_branch": 5,
+      "support_archetypal": 1
+    },
+    "SCD-0075": {
+      "consensus_level": "low",
+      "largest_group_label_set": "multi_branch",
+      "largest_group_size": 3,
+      "largest_group_fraction": 0.3333333333333333,
+      "mean_pairwise_jaccard": 0.2777777777777778,
+      "support_clusters": 3,
+      "support_simple_traj": 2,
+      "support_multi_branch": 6,
+      "support_archetypal": 2
+    },
+    "SCD-0077": {
+      "consensus_level": "high",
+      "largest_group_label_set": "multi_branch",
+      "largest_group_size": 6,
+      "largest_group_fraction": 0.6666666666666666,
+      "mean_pairwise_jaccard": 0.75,
+      "support_clusters": 0,
+      "support_simple_traj": 0,
+      "support_multi_branch": 9,
+      "support_archetypal": 3
+    },
+    "SCD-0079": {
+      "consensus_level": "medium",
+      "largest_group_label_set": "clusters",
+      "largest_group_size": 3,
+      "largest_group_fraction": 0.3333333333333333,
+      "mean_pairwise_jaccard": 0.41203703703703703,
+      "support_clusters": 7,
+      "support_simple_traj": 0,
+      "support_multi_branch": 3,
+      "support_archetypal": 4
+    },
+    "SCD-0080": {
+      "consensus_level": "medium",
+      "largest_group_label_set": "multi_branch",
+      "largest_group_size": 5,
+      "largest_group_fraction": 0.5555555555555556,
+      "mean_pairwise_jaccard": 0.3611111111111111,
+      "support_clusters": 2,
+      "support_simple_traj": 0,
+      "support_multi_branch": 6,
+      "support_archetypal": 1
+    },
+    "SCD-0081": {
+      "consensus_level": "medium",
+      "largest_group_label_set": "multi_branch",
+      "largest_group_size": 5,
+      "largest_group_fraction": 0.5555555555555556,
+      "mean_pairwise_jaccard": 0.375,
+      "support_clusters": 0,
+      "support_simple_traj": 2,
+      "support_multi_branch": 6,
+      "support_archetypal": 1
+    },
+    "SCD-0084": {
+      "consensus_level": "low",
+      "largest_group_label_set": "EMPTY",
+      "largest_group_size": 3,
+      "largest_group_fraction": 0.3333333333333333,
+      "mean_pairwise_jaccard": 0.24537037037037038,
+      "support_clusters": 2,
+      "support_simple_traj": 1,
+      "support_multi_branch": 2,
+      "support_archetypal": 5
+    },
+    "SCD-0085": {
+      "consensus_level": "low",
+      "largest_group_label_set": "archetypal",
+      "largest_group_size": 4,
+      "largest_group_fraction": 0.4444444444444444,
+      "mean_pairwise_jaccard": 0.3101851851851852,
+      "support_clusters": 1,
+      "support_simple_traj": 3,
+      "support_multi_branch": 2,
+      "support_archetypal": 6
+    },
+    "SCD-0086": {
+      "consensus_level": "low",
+      "largest_group_label_set": "archetypal",
+      "largest_group_size": 3,
+      "largest_group_fraction": 0.3333333333333333,
+      "mean_pairwise_jaccard": 0.2916666666666667,
+      "support_clusters": 1,
+      "support_simple_traj": 4,
+      "support_multi_branch": 4,
+      "support_archetypal": 5
+    },
+    "SCD-0089": {
+      "consensus_level": "medium",
+      "largest_group_label_set": "multi_branch",
+      "largest_group_size": 4,
+      "largest_group_fraction": 0.4444444444444444,
+      "mean_pairwise_jaccard": 0.4351851851851852,
+      "support_clusters": 5,
+      "support_simple_traj": 0,
+      "support_multi_branch": 6,
+      "support_archetypal": 1
+    },
+    "SCD-0091": {
+      "consensus_level": "low",
+      "largest_group_label_set": "clusters",
+      "largest_group_size": 3,
+      "largest_group_fraction": 0.3333333333333333,
+      "mean_pairwise_jaccard": 0.2962962962962963,
+      "support_clusters": 6,
+      "support_simple_traj": 3,
+      "support_multi_branch": 3,
+      "support_archetypal": 2
+    },
+    "SCD-0093": {
+      "consensus_level": "low",
+      "largest_group_label_set": "clusters",
+      "largest_group_size": 3,
+      "largest_group_fraction": 0.3333333333333333,
+      "mean_pairwise_jaccard": 0.3611111111111111,
+      "support_clusters": 6,
+      "support_simple_traj": 0,
+      "support_multi_branch": 4,
+      "support_archetypal": 0
+    },
+    "SCD-0094": {
+      "consensus_level": "low",
+      "largest_group_label_set": "archetypal",
+      "largest_group_size": 3,
+      "largest_group_fraction": 0.3333333333333333,
+      "mean_pairwise_jaccard": 0.3333333333333333,
+      "support_clusters": 0,
+      "support_simple_traj": 1,
+      "support_multi_branch": 4,
+      "support_archetypal": 6
+    },
+    "SCD-0096": {
+      "consensus_level": "medium",
+      "largest_group_label_set": "archetypal",
+      "largest_group_size": 3,
+      "largest_group_fraction": 0.3333333333333333,
+      "mean_pairwise_jaccard": 0.5,
+      "support_clusters": 0,
+      "support_simple_traj": 6,
+      "support_multi_branch": 0,
+      "support_archetypal": 6
+    },
+    "SCD-0097": {
+      "consensus_level": "medium",
+      "largest_group_label_set": "archetypal+simple_traj",
+      "largest_group_size": 4,
+      "largest_group_fraction": 0.4444444444444444,
+      "mean_pairwise_jaccard": 0.4444444444444444,
+      "support_clusters": 0,
+      "support_simple_traj": 6,
+      "support_multi_branch": 0,
+      "support_archetypal": 6
+    },
+    "SCD-0098": {
+      "consensus_level": "low",
+      "largest_group_label_set": "EMPTY",
+      "largest_group_size": 3,
+      "largest_group_fraction": 0.3333333333333333,
+      "mean_pairwise_jaccard": 0.2569444444444444,
+      "support_clusters": 1,
+      "support_simple_traj": 2,
+      "support_multi_branch": 1,
+      "support_archetypal": 5
+    },
+    "SCD-0100": {
+      "consensus_level": "high",
+      "largest_group_label_set": "multi_branch",
+      "largest_group_size": 8,
+      "largest_group_fraction": 0.8888888888888888,
+      "mean_pairwise_jaccard": 0.7777777777777778,
+      "support_clusters": 1,
+      "support_simple_traj": 0,
+      "support_multi_branch": 8,
+      "support_archetypal": 0
+    },
+    "SCD-0101": {
+      "consensus_level": "low",
+      "largest_group_label_set": "clusters",
+      "largest_group_size": 3,
+      "largest_group_fraction": 0.3333333333333333,
+      "mean_pairwise_jaccard": 0.3425925925925926,
+      "support_clusters": 5,
+      "support_simple_traj": 1,
+      "support_multi_branch": 5,
+      "support_archetypal": 2
+    },
+    "SCD-0102": {
+      "consensus_level": "low",
+      "largest_group_label_set": "multi_branch",
+      "largest_group_size": 3,
+      "largest_group_fraction": 0.3333333333333333,
+      "mean_pairwise_jaccard": 0.35185185185185186,
+      "support_clusters": 3,
+      "support_simple_traj": 0,
+      "support_multi_branch": 6,
+      "support_archetypal": 4
+    },
+    "SCD-0103": {
+      "consensus_level": "low",
+      "largest_group_label_set": "clusters+multi_branch",
+      "largest_group_size": 4,
+      "largest_group_fraction": 0.4444444444444444,
+      "mean_pairwise_jaccard": 0.375,
+      "support_clusters": 6,
+      "support_simple_traj": 1,
+      "support_multi_branch": 6,
+      "support_archetypal": 3
+    },
+    "SCD-0104": {
+      "consensus_level": "low",
+      "largest_group_label_set": "clusters",
+      "largest_group_size": 3,
+      "largest_group_fraction": 0.3333333333333333,
+      "mean_pairwise_jaccard": 0.32407407407407407,
+      "support_clusters": 5,
+      "support_simple_traj": 1,
+      "support_multi_branch": 5,
+      "support_archetypal": 2
+    },
+    "SCD-0105": {
+      "consensus_level": "low",
+      "largest_group_label_set": "archetypal",
+      "largest_group_size": 3,
+      "largest_group_fraction": 0.3333333333333333,
+      "mean_pairwise_jaccard": 0.2314814814814815,
+      "support_clusters": 0,
+      "support_simple_traj": 2,
+      "support_multi_branch": 2,
+      "support_archetypal": 5
+    },
+    "SCD-0106": {
+      "consensus_level": "medium",
+      "largest_group_label_set": "multi_branch",
+      "largest_group_size": 5,
+      "largest_group_fraction": 0.5555555555555556,
+      "mean_pairwise_jaccard": 0.5601851851851852,
+      "support_clusters": 1,
+      "support_simple_traj": 3,
+      "support_multi_branch": 8,
+      "support_archetypal": 0
+    },
+    "SCD-0107": {
+      "consensus_level": "low",
+      "largest_group_label_set": "archetypal",
+      "largest_group_size": 4,
+      "largest_group_fraction": 0.4444444444444444,
+      "mean_pairwise_jaccard": 0.2777777777777778,
+      "support_clusters": 2,
+      "support_simple_traj": 0,
+      "support_multi_branch": 1,
+      "support_archetypal": 5
+    },
+    "SCD-0108": {
+      "consensus_level": "low",
+      "largest_group_label_set": "clusters",
+      "largest_group_size": 4,
+      "largest_group_fraction": 0.4444444444444444,
+      "mean_pairwise_jaccard": 0.3587962962962963,
+      "support_clusters": 6,
+      "support_simple_traj": 1,
+      "support_multi_branch": 4,
+      "support_archetypal": 2
+    },
+    "SCD-0109": {
+      "consensus_level": "medium",
+      "largest_group_label_set": "clusters",
+      "largest_group_size": 6,
+      "largest_group_fraction": 0.6666666666666666,
+      "mean_pairwise_jaccard": 0.5972222222222222,
+      "support_clusters": 8,
+      "support_simple_traj": 0,
+      "support_multi_branch": 3,
+      "support_archetypal": 1
+    },
+    "SCD-0110": {
+      "consensus_level": "low",
+      "largest_group_label_set": "simple_traj",
+      "largest_group_size": 4,
+      "largest_group_fraction": 0.4444444444444444,
+      "mean_pairwise_jaccard": 0.3333333333333333,
+      "support_clusters": 0,
+      "support_simple_traj": 6,
+      "support_multi_branch": 1,
+      "support_archetypal": 3
+    },
+    "SCD-0111": {
+      "consensus_level": "low",
+      "largest_group_label_set": "multi_branch",
+      "largest_group_size": 4,
+      "largest_group_fraction": 0.4444444444444444,
+      "mean_pairwise_jaccard": 0.3333333333333333,
+      "support_clusters": 0,
+      "support_simple_traj": 3,
+      "support_multi_branch": 6,
+      "support_archetypal": 2
+    }
+  }
+}
