@@ -6,23 +6,20 @@ from scshapebench.datasets.labels import CLASS_ORDER
 from scshapebench.features.persistence import FEAT_DIM
 
 
-class _BinaryMLP(torch.nn.Module):
+_NUM_CLASSES = 4
+
+
+class _MultiMLP(torch.nn.Module):
     def __init__(self, in_features: int = FEAT_DIM, hidden: int = 64):
         super().__init__()
         self.net = torch.nn.Sequential(
             torch.nn.Linear(in_features, hidden),
-            torch.nn.BatchNorm1d(hidden),
             torch.nn.ReLU(),
-            torch.nn.Dropout(0.3),
-            torch.nn.Linear(hidden, hidden // 2),
-            torch.nn.BatchNorm1d(hidden // 2),
-            torch.nn.ReLU(),
-            torch.nn.Dropout(0.3),
-            torch.nn.Linear(hidden // 2, 1),
+            torch.nn.Linear(hidden, _NUM_CLASSES),
         )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        return self.net(x).squeeze(1)
+        return self.net(x)
 
 
 def _make_loader(X, y, batch_size, shuffle):
@@ -55,53 +52,33 @@ class MLPModel:
     features_source = "persistence"
 
     def __init__(self, device=None, hidden: int = 64, batch_size: int = 16,
-                 lr: float = 1e-3, epochs: int = 100):
+                 lr: float = 1e-3, epochs: int = 1):
         self.device = device or torch.device("cpu")
         self.hidden = hidden
         self.batch_size = batch_size
         self.lr = lr
         self.epochs = epochs
-        self._state: dict = {}  # {cls_name: (mean, std, model)}
+        self._state = None  # (mean, std, model)
 
     def fit(self, graphs, labels: np.ndarray, features: np.ndarray) -> None:
-        self._state = {}
-        for cls_idx, cls_name in enumerate(CLASS_ORDER):
-            y = labels[:, cls_idx].astype(np.float32)
+        mean = features.mean(axis=0)
+        std  = features.std(axis=0) + 1e-8
+        X    = ((features - mean) / std).astype(np.float32)
+        y    = labels.astype(np.float32)
 
-            if len(np.unique(y)) < 2:
-                self._state[cls_name] = None
-                continue
+        loader = _make_loader(X, y, self.batch_size, shuffle=True)
+        model = _MultiMLP(in_features=X.shape[1], hidden=self.hidden).to(self.device)
+        optimizer = torch.optim.Adam(model.parameters(), lr=self.lr, weight_decay=1e-4)
+        criterion = torch.nn.BCEWithLogitsLoss()
 
-            mean = features.mean(axis=0)
-            std  = features.std(axis=0) + 1e-8
-            X    = ((features - mean) / std).astype(np.float32)
+        for _ in range(self.epochs):
+            _train_epoch(model, loader, optimizer, criterion, self.device)
 
-            loader = _make_loader(X, y, self.batch_size, shuffle=True)
-            model = _BinaryMLP(in_features=X.shape[1], hidden=self.hidden).to(self.device)
-            optimizer = torch.optim.Adam(model.parameters(), lr=self.lr, weight_decay=1e-4)
-            criterion = torch.nn.BCEWithLogitsLoss()
-
-            for _ in range(self.epochs):
-                _train_epoch(model, loader, optimizer, criterion, self.device)
-
-            self._state[cls_name] = (mean, std, model)
+        self._state = (mean, std, model)
 
     def predict(self, graphs, features: np.ndarray):
-        n = len(features)
-        preds = np.zeros((n, len(CLASS_ORDER)), dtype=int)
-        probs = np.zeros((n, len(CLASS_ORDER)), dtype=np.float32)
-
-        dummy_y = np.zeros(n, dtype=np.float32)
-
-        for cls_idx, cls_name in enumerate(CLASS_ORDER):
-            state = self._state.get(cls_name)
-            if state is None:
-                continue
-            mean, std, model = state
-            X = ((features - mean) / std).astype(np.float32)
-            loader = _make_loader(X, dummy_y, self.batch_size, shuffle=False)
-            p, pb = _predict(model, loader, self.device)
-            preds[:, cls_idx] = p
-            probs[:, cls_idx] = pb
-
-        return preds, probs
+        mean, std, model = self._state
+        X = ((features - mean) / std).astype(np.float32)
+        dummy_y = np.zeros((len(X), _NUM_CLASSES), dtype=np.float32)
+        loader = _make_loader(X, dummy_y, self.batch_size, shuffle=False)
+        return _predict(model, loader, self.device)

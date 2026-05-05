@@ -4,10 +4,11 @@ combined comparison table.
 
 Usage
 -----
-python run_benchmark_all.py --label-type confidence_score --output results/
+python run_benchmark_all.py --label-type confidence_score --splits splits/folds_v1.json --output results/
 """
 
 import argparse
+import json
 import math
 from pathlib import Path
 
@@ -38,14 +39,14 @@ LABEL_PATHS = {
     "confidence_score": "benchmarks/scrnaseq/labels/confidence_labels.json",
 }
 
-MODEL_ORDER = ("mlp", "pi_svm", "stats_svm")
+MODEL_ORDER = ("mlp", "stats_svm")
 
 # column order within each model group in the LaTeX table
 _CLASS_LATEX_ORDER = [
-    ("archetypal",   "A"),
     ("clusters",     "Cl"),
     ("simple_traj",  "ST"),
     ("multi_branch", "MT"),
+    ("archetypal",   "A"),
 ]
 
 _MODEL_DISPLAY_NAMES = {
@@ -88,7 +89,15 @@ def make_folds(graphs, k=5, seed=42):
     return folds
 
 
-def run_single(submission_dir: Path, label_type: str, output_dir: Path, device):
+def load_folds(splits_path: Path) -> list:
+    data = json.loads(splits_path.read_text())
+    folds = []
+    for key in sorted(data.keys()):
+        folds.append({"train": data[key]["train"], "test": data[key]["test"]})
+    return folds
+
+
+def run_single(submission_dir: Path, label_type: str, output_dir: Path, device, splits_path: Path = None):
     print(f"\nRunning benchmark on {submission_dir.name} ...")
     graphs, metadata = load_graphs(submission_dir)
     validate_submission(graphs)
@@ -96,7 +105,11 @@ def run_single(submission_dir: Path, label_type: str, output_dir: Path, device):
     labels, _, dataset_order = load_labels(path=LABEL_PATHS[label_type])
     id_to_idx = {sid: i for i, sid in enumerate(dataset_order)}
 
-    splits = make_folds(graphs, k=5, seed=42)
+    if splits_path is not None:
+        print(f"  Using predefined splits from {splits_path}")
+        splits = load_folds(splits_path)
+    else:
+        splits = make_folds(graphs, k=5, seed=42)
     all_results = {}
 
     for fold_id, split in enumerate(splits):
@@ -179,14 +192,15 @@ def _print_latex_table(
     models_present = [m for m in MODEL_ORDER if any(m in r for r, _ in all_method_results)]
     n = len(models_present)
 
-    # collect AUC per (model, class) column to find best / second-best
+    # rank on F1 per (model, class) to find best / second-best
     col_scores: dict = {}
     for final_results, metadata in all_method_results:
         method = metadata.get("method", "unknown")
         for mdl in models_present:
             for cls_name, _ in _CLASS_LATEX_ORDER:
-                mean = final_results.get(mdl, {}).get(cls_name, {}).get("auc_mean", float("nan"))
-                col_scores.setdefault((mdl, cls_name), []).append((method, mean))
+                for metric in ("accuracy", "f1"):
+                    mean = final_results.get(mdl, {}).get(cls_name, {}).get(f"{metric}_mean", float("nan"))
+                    col_scores.setdefault((mdl, cls_name, metric), []).append((method, mean))
 
     best, second = {}, {}
     for key, entries in col_scores.items():
@@ -196,42 +210,63 @@ def _print_latex_table(
         if len(ranked) >= 2:
             second[key] = ranked[1][0]
 
-    def _decorate(mdl, cls_name, method, mean, std):
+    def _decorate(mdl, cls_name, metric, method, mean, std):
         cell = _fmt_latex_val(mean, std)
-        key = (mdl, cls_name)
+        key = (mdl, cls_name, metric)
         if best.get(key) == method:
             return r"\textbf{" + cell + "}"
         if second.get(key) == method:
             return r"\underline{" + cell + "}"
         return cell
 
-    # tabular column spec:  l  cccc c  cccc c  cccc
-    col_spec = "l " + " ".join("cccc" + (" c" if i < n - 1 else "") for i in range(n))
+    # 2 metrics per class → 8 cols per model group, plus a separator between groups
+    # col spec:  l  cccccccc c  cccccccc c  cccccccc
+    col_spec = "l " + " ".join("cccccccc" + (" c" if i < n - 1 else "") for i in range(n))
 
+    # each model group spans 8 cols; col index of group i starts at 2 + i*9
     cmidrules = " ".join(
-        f"\\cmidrule(lr){{{2 + i * 5}-{5 + i * 5}}}" for i in range(n)
+        f"\\cmidrule(lr){{{2 + i * 9}-{9 + i * 9}}}" for i in range(n)
     )
 
     model_header_cells = []
     for i, mdl in enumerate(models_present):
-        model_header_cells.append(f"\\multicolumn{{4}}{{c}}{{{_MODEL_DISPLAY_NAMES.get(mdl, mdl)}}}")
+        model_header_cells.append(f"\\multicolumn{{8}}{{c}}{{{_MODEL_DISPLAY_NAMES.get(mdl, mdl)}}}")
         if i < n - 1:
             model_header_cells.append("")
     model_header = "& " + " & ".join(model_header_cells) + r" \\"
 
-    class_header_cells = ["Method"]
+    # second header row: class labels spanning 2 cols each
+    class_header_cells = [""]
     for i, _ in enumerate(models_present):
         for _, col_label in _CLASS_LATEX_ORDER:
-            class_header_cells.append(col_label)
+            class_header_cells.append(f"\\multicolumn{{2}}{{c}}{{{col_label}}}")
         if i < n - 1:
             class_header_cells.append("")
     class_header = " & ".join(class_header_cells) + r" \\"
+
+    # cmidrules under each class label (pairs of cols)
+    class_cmidrules_parts = []
+    for i in range(n):
+        group_start = 2 + i * 9
+        for j in range(len(_CLASS_LATEX_ORDER)):
+            s = group_start + j * 2
+            class_cmidrules_parts.append(f"\\cmidrule(lr){{{s}-{s + 1}}}")
+    class_cmidrules = " ".join(class_cmidrules_parts)
+
+    # third header row: Acc / F1 repeated
+    metric_header_cells = ["Method"]
+    for i, _ in enumerate(models_present):
+        for _ in _CLASS_LATEX_ORDER:
+            metric_header_cells.extend(["Acc", "F1"])
+        if i < n - 1:
+            metric_header_cells.append("")
+    metric_header = " & ".join(metric_header_cells) + r" \\"
 
     lines = []
     lines.append(r"\begin{table}[H]")
     lines.append(r"\centering")
     lines.append(
-        rf"\caption{{Per-shape one-vs-rest AUROC on the scRNAseq track of scShapeBench "
+        rf"\caption{{Per-shape accuracy and F1 on the scRNAseq track of scShapeBench "
         rf"(\textbf{{label type:}} {label_type}). "
         rf"Shape classes: \textbf{{A}}rchetypal, \textbf{{Cl}}usters, "
         rf"\textbf{{S}}imple \textbf{{T}}rajectory, \textbf{{M}}ultiple \textbf{{T}}rajectories. "
@@ -246,6 +281,8 @@ def _print_latex_table(
     lines.append(model_header)
     lines.append(cmidrules)
     lines.append(class_header)
+    lines.append(class_cmidrules)
+    lines.append(metric_header)
     lines.append(r"\midrule")
 
     for final_results, metadata in all_method_results:
@@ -258,9 +295,10 @@ def _print_latex_table(
         for i, mdl in enumerate(models_present):
             for cls_name, _ in _CLASS_LATEX_ORDER:
                 r = final_results.get(mdl, {}).get(cls_name, {})
-                mean = r.get("auc_mean", float("nan"))
-                std = r.get("auc_std", float("nan"))
-                cells.append(_decorate(mdl, cls_name, method, mean, std))
+                for metric in ("accuracy", "f1"):
+                    mean = r.get(f"{metric}_mean", float("nan"))
+                    std = r.get(f"{metric}_std", float("nan"))
+                    cells.append(_decorate(mdl, cls_name, metric, method, mean, std))
             if i < n - 1:
                 cells.append("")
         lines.append(" & ".join(cells) + r" \\")
@@ -296,6 +334,12 @@ def main():
         help="Run only these method names (default: all subdirs)",
     )
     parser.add_argument(
+        "--splits",
+        default=None,
+        help="Path to a predefined folds JSON (e.g. splits/folds_v1.json). "
+             "If omitted, folds are generated randomly (seed=42).",
+    )
+    parser.add_argument(
         "--our-method",
         default=None,
         help="Method name to separate with \\midrule and bold in the LaTeX table",
@@ -322,9 +366,11 @@ def main():
     print(f"Found {len(method_dirs)} method(s): {[d.name for d in method_dirs]}")
     print(f"Label type: {args.label_type}")
 
+    splits_path = Path(args.splits) if args.splits else None
+
     all_method_results = []
     for method_dir in method_dirs:
-        final_results, metadata = run_single(method_dir, args.label_type, output_dir, device)
+        final_results, metadata = run_single(method_dir, args.label_type, output_dir, device, splits_path)
         all_method_results.append((final_results, metadata))
 
     _print_comparison_table(all_method_results, args.label_type)
