@@ -1,240 +1,252 @@
 # scShapeBench
 
-**scShapeBench** is a benchmark for evaluating **graph extraction methods** on single-cell shape datasets.
+scShapeBench is a benchmark for evaluating graph extraction methods on single-cell shape data.
 
-Unlike typical machine learning benchmarks, scShapeBench **does not evaluate end-to-end models**. Instead, it evaluates the *quality of graph representations* produced by different methods under a fixed, standardized downstream pipeline.
+The repository now has two tracks:
 
----
+- **Real data**: classify expert-annotated scRNA-seq graphs using fixed downstream models.
+- **Synthetic data**: score recovered graphs against ground-truth graph structure and persistence.
 
-## 🔍 Overview
-
-Given a dataset of samples, users apply their own **graph extraction method** to produce a graph for each sample.
-scShapeBench then evaluates these graphs using:
-
-* Fixed train/test splits
-* Standard downstream models (MLP, SVM, GNN)
-* Standard classification metrics (Accuracy, F1, AUC, Precision, Recall)
-
-This ensures that **performance differences reflect graph quality, not training tricks**.
+The benchmark is method-agnostic. You provide graphs; scShapeBench evaluates them with a fixed pipeline.
 
 ---
 
-## 🧠 Benchmark Protocol
+## Overview
 
-The benchmark implements the following function:
+Real-data evaluation asks whether a method's graph makes expert shape labels predictable.
 
-```
-graphs → scores
-```
+Synthetic evaluation asks whether a method recovers the contracted ground-truth graph, using:
 
-Where:
-
-* **Input**: a set of graphs (one per dataset sample)
-* **Output**: classification performance across predefined tasks
-
-Everything else is fixed and controlled by the benchmark.
+- graph edit distance as the primary topology score
+- persistence similarity as the primary persistence score
+- additional diagnostics for debugging and analysis
 
 ---
 
-## 📦 Submission Format
+## Installation
 
-Users must provide a **submission directory** with one subdirectory per dataset:
-
+```bash
+pip install -e .
 ```
+
+---
+
+## Data
+
+Real scRNA-seq annotations are loaded from the repository's benchmark data and are evaluated with the `high_support` label set by default.
+
+Synthetic benchmark data is distributed separately as a release bundle and should be unpacked so the dataset directory contains:
+
+- `manifest.jsonl`
+- `dataset_config.json`
+- `samples/*.npz`
+- `samples/*.json`
+
+The shipped synthetic bundle is the `new1000` release, reindexed to a contiguous `0..999` naming scheme.
+
+---
+
+## Real-data submission format
+
+For the real scRNA-seq track, submit one graph per sample:
+
+```text
 my_submission/
 ├── SCD-0001/
 │   ├── nodes.csv
 │   ├── edges.csv
-│   ├── h0_finite.csv       # optional
-│   └── h1_essential.csv    # optional
+│   ├── h0_finite.csv      # optional
+│   └── h1_essential.csv   # optional
 ├── SCD-0002/
 │   ├── nodes.csv
 │   └── edges.csv
 └── ...
 ```
 
-Sample directories may also be named with trailing integers such as `1` or
-`SC-001`; the loader normalizes them to `SCD-0001`.
+Requirements:
 
-**Requirements:**
+- one graph per sample
+- sample IDs must match benchmark IDs after normalization
+- `nodes.csv` columns: `id,x,y`
+- `edges.csv` columns: `source,target,length`
+- optional persistence files use one value per row:
+  - `h0_finite.csv` with `death`
+  - `h1_essential.csv` with `birth`
 
-* One graph per sample
-* Sample IDs must match benchmark dataset IDs after normalization
-* No NaNs or invalid values
-* `nodes.csv` columns: `id,x,y`
-* `edges.csv` columns: `source,target,length`
-* `h0_finite.csv` column: `death`, if persistence features are supplied
-* `h1_essential.csv` column: `birth`, if persistence features are supplied
-
----
-
-## 📥 Data
-
-Datasets are hosted on HuggingFace. Download them before running the benchmark:
-
-```bash
-pip install -e .
-python scripts/download_data.py --local-dir data/
-```
-
-This will populate `data/` with the raw cell shape samples. You can also specify a custom repo:
-
-```bash
-python scripts/download_data.py --repo-id your-username/scShapeBench --local-dir data/
-```
+The loader accepts folder names like `1` or `SC-001` and normalizes them to `SCD-0001`.
 
 ---
 
-## 🚀 Running the Benchmark
+## Synthetic submission format
 
-Install the package:
+For synthetic evaluation, submit one JSON file per sample, using the same graph payload schema as the generated benchmark data.
 
-```bash
-pip install -e .
-```
+The evaluator reads:
 
-Run evaluation on scRNA-seq data:
+- `nodes`
+- `edges`
+- `node_positions`
 
-```bash
-python run_benchmark_single_cell.py \
-    --submission path/to/submission \
-    --label-type confidence_score \
-    --splits splits/folds_v1.json \
-    --output results/
-```
-
-Run evaluation on synthetic data:
-
-```bash
-python run_benchmark_synthetic.py \
-    --submission path/to/submission \
-    --output results/
-```
-
-Optional:
-
-```bash
---device cuda
-```
+The rest of the benchmark bundle is used for truth loading and scoring.
 
 ---
 
-## 📊 Output
+## Running the benchmark
 
-Results are saved as JSON:
+Use the unified dispatcher:
 
-```json
-{
-  "metadata": {...},
-  "results": {
-    "mlp": {
-      "accuracy_mean": 0.85,
-      "f1_mean": 0.83,
-      "auc_mean": 0.90
-    },
-    "gnn": {
-      ...
-    }
-  }
-}
+### Real track
+
+All methods:
+
+```bash
+python run_benchmark.py \
+  --track real \
+  --real-mode all \
+  --submissions-dir submissions/submissions/scRNAseq \
+  --label-type high_support \
+  --splits splits/folds_v1.json \
+  --output results/high_support \
+  --device cpu
 ```
 
-All metrics are averaged across **fixed cross-validation splits**.
+Single submission:
 
----
-
-## 📁 Repository Structure
-
+```bash
+python run_benchmark.py \
+  --track real \
+  --real-mode single \
+  --submission submissions/submissions/scRNAseq/paga \
+  --label-type high_support \
+  --splits splits/folds_v1.json \
+  --output results/high_support_single \
+  --device cpu
 ```
-src/scshapebench/
-├── evaluator/        # benchmark logic (runner, metrics, validation)
-├── models/           # fixed evaluation models (MLP, SVM, GNN)
-├── features/         # graph → feature extraction (for MLP/SVM)
-├── schemas/          # graph format definition
+
+### Synthetic track
+
+Evaluate one prediction directory against the shipped dataset:
+
+```bash
+python run_benchmark.py \
+  --track synthetic evaluate dataset \
+  --dataset-dir /path/to/full_1000_swept_seed_20260422/dataset \
+  --predictions-dir /path/to/predictions \
+  --output-path results/synthetic_eval.json
 ```
 
-Additional directories:
+Run the synthetic method benchmark:
 
-```
-splits/               # predefined train/test splits
-scripts/              # CLI entrypoints
-examples/             # example submissions
+```bash
+python run_benchmark_synthetic.py run-methods \
+  --dataset-dir /path/to/full_1000_swept_seed_20260422/dataset \
+  --output-dir results/method_benchmark
 ```
 
 ---
 
-## 🔒 Reproducibility
+## Outputs
+
+### Real track
+
+Real-data runs write:
+
+- `summary_<label_type>.csv`
+- `table_<label_type>.txt`
+- `table_<label_type>_baselines.txt`
+- `results_*.json`
+
+Primary real-data metrics are:
+
+- macro AUPRC
+- macro AUC
+- macro balanced accuracy
+
+Secondary metrics include:
+
+- macro F1
+- exact match
+- per-class scores
+
+### Synthetic track
+
+Synthetic dataset evaluation writes:
+
+- a JSON report
+- a LaTeX table sidecar with the headline scores
+- optional manifold diagnostics
+
+The paper-facing headline synthetic metrics are:
+
+- graph edit distance
+- persistence similarity
+
+The synthetic method benchmark also writes:
+
+- `results.csv`
+- `summary.csv`
+- `summary.tex`
+- optional PDF figures
+
+---
+
+## Reproducibility
 
 scShapeBench enforces:
 
-* Fixed dataset splits
-* Fixed evaluation models
-* Deterministic evaluation pipeline
-* Explicit always-negative, always-positive, train-prevalence, and random-prevalence baselines
-* Strict graph/label ID alignment: unlabeled graphs and graphless labels are excluded from scoring and reported
-
-Users **cannot modify training or evaluation procedures**.
-
----
-
-## ❗ Design Principles
-
-* **Method-agnostic**: users can use any graph extraction approach
-* **Fair comparison**: identical downstream evaluation
-* **Minimal interface**: only graphs are required
-* **Strict validation**: malformed submissions are rejected
+- fixed splits on the real track
+- fixed downstream models
+- deterministic evaluation where possible
+- explicit baselines on the real track
+- strict graph/label ID alignment
+- no training or tuning inside submissions
 
 ---
 
-## 🧪 Example
+## Repository layout
 
-See:
-
-```
-examples/dummy_submission/
+```text
+src/scshapebench/
+├── evaluator/        # real-data evaluation backend
+├── synthetic/        # synthetic generation and evaluation
+├── models/           # fixed evaluation models
+├── features/         # graph feature extraction
+└── datasets/         # label loading and dataset helpers
 ```
 
-for a minimal working submission.
+Top-level entrypoints:
+
+- `run_benchmark.py`
+- `run_benchmark_all.py`
+- `run_benchmark_single_cell.py`
+- `run_benchmark_synthetic.py`
 
 ---
 
-## 📄 Citation
+## Example
 
-If you use scShapeBench, please cite:
-
-```
-@article{scshapebench2026,
-  title={scShapeBench: A Benchmark for Graph Extraction Methods on Single-Cell Shape Data},
-  author={...},
-  year={2026}
-}
-```
+See `examples/dummy_submission/` for a minimal real-data submission.
 
 ---
 
-## 🤝 Contributing
+## Citation
 
-We welcome:
-
-* New datasets
-* Additional evaluation tasks
-* Improvements to validation and metrics
-
-Please open an issue or pull request.
+If you use scShapeBench, please cite the paper associated with this repository.
 
 ---
 
-## ⚠️ Common Pitfalls
+## Common pitfalls
 
-* Missing graph files
-* Mismatched sample IDs
-* Incorrect tensor shapes
-* Including training logic in submissions
+- missing graph files
+- mismatched sample IDs
+- malformed CSV columns
+- using the wrong track or label type
+- including training logic in submissions
 
 ---
 
-## 📬 Contact
+## Contact
 
-For questions or issues, please open a GitHub issue.
+For questions or issues, open a GitHub issue.
 
 ---

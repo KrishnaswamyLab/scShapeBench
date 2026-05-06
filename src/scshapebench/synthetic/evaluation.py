@@ -1006,6 +1006,12 @@ def _aggregate_dataset_results(
             ),
         },
         "diagnostics": {
+            "mean_graph_edit_distance": _safe_mean(
+                sample["topology"]["graph_edit_distance"] for sample in per_sample_results
+            ),
+            "graph_edit_distance_exact_rate": _safe_mean(
+                float(sample["topology"]["graph_edit_distance_exact"]) for sample in per_sample_results
+            ),
             "raw_exact_match_rate": _safe_mean(
                 float(sample["topology"]["exact_match"]) for sample in per_sample_results
             ),
@@ -1943,6 +1949,7 @@ def main() -> None:
         )
         if args.output_path is not None:
             _write_json(Path(args.output_path), result)
+            _write_latex_summary(Path(args.output_path).with_suffix(".tex"), result)
         if not args.skip_manifold_render:
             manifold_output_path = _resolve_manifold_output_path(
                 report_output_path=args.output_path,
@@ -1971,6 +1978,36 @@ def main() -> None:
 def _write_json(path: Path, payload: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(_to_jsonable(payload), indent=2) + "\n", encoding="utf-8")
+
+
+def _write_latex_summary(path: Path, payload: dict[str, Any]) -> None:
+    summary = payload.get("summary", {})
+    headline_scores = summary.get("headline_scores", {})
+    diagnostics = summary.get("diagnostics", {})
+
+    ged = diagnostics.get("mean_graph_edit_distance", float("nan"))
+    persistence = headline_scores.get("persistence_score", float("nan"))
+
+    lines = []
+    lines.append(r"\begin{table}[t]")
+    lines.append(r"\centering")
+    lines.append(
+        r"\caption{Synthetic benchmark summary for one prediction set. "
+        r"Graph edit distance (GED) is lower is better; persistence similarity is higher is better.}"
+    )
+    lines.append(r"\label{tab:synthetic-single-summary}")
+    lines.append(r"\begin{tabular}{lc}")
+    lines.append(r"\toprule")
+    lines.append(r"Metric & Value \\")
+    lines.append(r"\midrule")
+    lines.append(f"GED $\\downarrow$ & {_format_latex_float(ged)} \\\\")
+    lines.append(f"Persistence similarity $\\uparrow$ & {_format_latex_float(persistence)} \\\\")
+    lines.append(r"\bottomrule")
+    lines.append(r"\end{tabular}")
+    lines.append(r"\end{table}")
+
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
 def _resolve_manifold_output_path(
@@ -2035,6 +2072,16 @@ def _to_jsonable(value: Any) -> Any:
     if isinstance(value, np.bool_):
         return bool(value)
     return value
+
+
+def _format_latex_float(value: Any) -> str:
+    try:
+        numeric = float(value)
+    except (TypeError, ValueError):
+        return r"\text{---}"
+    if not np.isfinite(numeric):
+        return r"\text{---}"
+    return f"{numeric:.3f}"
 
 
 if __name__ == "__main__":

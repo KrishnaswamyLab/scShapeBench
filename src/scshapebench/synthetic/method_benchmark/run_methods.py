@@ -754,6 +754,50 @@ def write_summary(rows: list[dict[str, Any]], output_dir: Path) -> None:
         for row in summary_rows:
             writer.writerow(row)
 
+    write_summary_latex(rows, output_dir)
+
+
+def write_summary_latex(rows: list[dict[str, Any]], output_dir: Path) -> None:
+    if not rows:
+        return
+
+    groups: dict[tuple[str, str], list[dict[str, Any]]] = {}
+    for row in rows:
+        groups.setdefault((str(row["method"]), str(row["track"])), []).append(row)
+
+    lines = []
+    lines.append(r"\begin{table}[t]")
+    lines.append(r"\centering")
+    lines.append(
+        r"\caption{Synthetic benchmark summary on the full recovered-graph track. "
+        r"Graph edit distance (GED) is reported as a lower-is-better score; "
+        r"persistence similarity is reported as a higher-is-better score. "
+        r"Values are mean $\pm$ std over benchmark samples.}"
+    )
+    lines.append(r"\label{tab:synthetic-summary}")
+    lines.append(r"\setlength{\tabcolsep}{5pt}")
+    lines.append(r"\begin{tabular}{llcc}")
+    lines.append(r"\toprule")
+    lines.append(r"Method & Track & GED $\downarrow$ & Persistence similarity $\uparrow$ \\")
+    lines.append(r"\midrule")
+
+    for (method, track), group_rows in sorted(groups.items()):
+        ok_rows = [row for row in group_rows if row["status"] == "ok"]
+        ged_mean, ged_std = field_mean_std(ok_rows, "graph_edit_distance")
+        pers_mean, pers_std = field_mean_std(ok_rows, "persistence_score")
+        lines.append(
+            f"{latex_escape(method)} & {latex_escape(track)} & "
+            f"{fmt_pm(ged_mean, ged_std)} & {fmt_pm(pers_mean, pers_std)} \\\\"
+        )
+
+    lines.append(r"\bottomrule")
+    lines.append(r"\end{tabular}")
+    lines.append(r"\end{table}")
+
+    path = output_dir / "summary.tex"
+    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    print(f"wrote: {path}", flush=True)
+
 
 def render_random_sample_pdfs(
     args: argparse.Namespace,
@@ -1014,6 +1058,37 @@ def mean_field(rows: list[dict[str, Any]], field: str) -> float | str:
 def mean_bool(rows: list[dict[str, Any]], field: str) -> float | str:
     values = [bool(row[field]) for row in rows if row.get(field) not in ("", None)]
     return float(sum(1.0 for value in values if value) / len(values)) if values else ""
+
+
+def field_mean_std(rows: list[dict[str, Any]], field: str) -> tuple[float, float]:
+    values = [float(row[field]) for row in rows if row.get(field) not in ("", None)]
+    if not values:
+        return float("nan"), float("nan")
+    array = np.asarray(values, dtype=float)
+    return float(array.mean()), float(array.std(ddof=0))
+
+
+def fmt_pm(mean: float, std: float) -> str:
+    if not np.isfinite(mean):
+        return r"\text{---}"
+    if not np.isfinite(std):
+        return f"{mean:.3f}"
+    return f"{mean:.3f}$\\pm${std:.3f}"
+
+
+def latex_escape(text: str) -> str:
+    return (
+        text.replace("\\", r"\textbackslash{}")
+        .replace("&", r"\&")
+        .replace("%", r"\%")
+        .replace("$", r"\$")
+        .replace("#", r"\#")
+        .replace("_", r"\_")
+        .replace("{", r"\{")
+        .replace("}", r"\}")
+        .replace("~", r"\textasciitilde{}")
+        .replace("^", r"\textasciicircum{}")
+    )
 
 
 def format_markdown_cell(value: Any) -> str:
