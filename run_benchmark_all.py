@@ -22,6 +22,11 @@ from scshapebench.evaluator.validator import validate_submission
 from scshapebench.evaluator.metrics import evaluate, aggregate
 from scshapebench.evaluator.io import save_results, store_result
 from scshapebench.evaluator.baselines import baseline_predictions
+from scshapebench.evaluator.runner import (
+    LABEL_PATHS,
+    run_real_collection,
+    run_real_submission,
+)
 from scshapebench.datasets.labels import load_labels
 from scshapebench.features.persistence import extract_features as extract_persistence_features
 from scshapebench.features.graph_stats import extract_features as extract_graph_features
@@ -33,13 +38,6 @@ _CLASS_DISPLAY = {
     "simple_traj":  "SINGLE_TRAJECTORY",
     "multi_branch": "MULTI_BRANCHING",
     "archetypal":   "ARCHETYPAL",
-}
-
-LABEL_PATHS = {
-    "majority": "benchmarks/scrnaseq/labels/majority_labels.json",
-    "union": "benchmarks/scrnaseq/labels/union_labels.json",
-    "confidence_score": "benchmarks/scrnaseq/labels/confidence_labels.json",
-    "high_support": "benchmarks/scrnaseq/labels/high_support_labels.json",
 }
 
 MODEL_ORDER = ("gnn", "mlp", "stats_svm")
@@ -130,73 +128,13 @@ def _set_model_seed(seed: int) -> None:
 
 
 def run_single(submission_dir: Path, label_type: str, output_dir: Path, device, splits_path: Path = None):
-    print(f"\nRunning benchmark on {submission_dir.name} ...")
-    graphs, metadata = load_graphs(submission_dir)
-    validate_submission(graphs)
-
-    labels, _, dataset_order = load_labels(path=LABEL_PATHS[label_type])
-    id_to_idx = {sid: i for i, sid in enumerate(dataset_order)}
-    evaluable_ids = set(graphs) & set(dataset_order)
-    graph_only = sorted(set(graphs) - set(dataset_order))
-    label_only = sorted(set(dataset_order) - set(graphs))
-    if graph_only:
-        print(f"  Warning: excluding {len(graph_only)} graph(s) with no label: {', '.join(graph_only[:5])}")
-    if label_only:
-        print(f"  Warning: excluding {len(label_only)} label(s) with no graph: {', '.join(label_only[:5])}")
-    if not evaluable_ids:
-        raise ValueError(f"{submission_dir.name}: no dataset IDs have both graphs and labels.")
-
-    if splits_path is not None:
-        print(f"  Using predefined splits from {splits_path}")
-        splits = load_folds(splits_path)
-    else:
-        splits = make_folds({sid: graphs[sid] for sid in evaluable_ids}, k=5, seed=42)
-    all_results = {}
-
-    for fold_id, split in enumerate(splits):
-        print(f"  Fold {fold_id} ...", end="\r")
-        train_ids = _filter_split_ids(split["train"], evaluable_ids, "train")
-        test_ids = _filter_split_ids(split["test"], evaluable_ids, "test")
-
-        train_graphs = [graphs[i] for i in train_ids]
-        test_graphs = [graphs[i] for i in test_ids]
-        train_labels = labels[[id_to_idx[i] for i in train_ids]]
-        test_labels = labels[[id_to_idx[i] for i in test_ids]]
-
-        if len(train_graphs) != len(train_labels) or len(test_graphs) != len(test_labels):
-            raise RuntimeError("Internal ID alignment error between graphs and labels.")
-
-        features_cache = {
-            "persistence": extract_persistence_features(train_graphs, test_graphs),
-            "graph_stats": extract_graph_features(train_graphs, test_graphs),
-        }
-
-        for baseline_name, (preds, probs) in baseline_predictions(
-            train_labels=train_labels,
-            test_labels=test_labels,
-            seed=20_000 + fold_id,
-        ).items():
-            store_result(
-                all_results,
-                model_name=baseline_name,
-                fold_id=fold_id,
-                metrics=evaluate(test_labels, preds, probs),
-            )
-
-        for model_idx, model in enumerate(get_models(device)):
-            _set_model_seed(10_000 + fold_id * 100 + model_idx)
-            src = model.features_source
-            X_train_m, X_test_m = features_cache[src] if src else (None, None)
-            model.fit(graphs=train_graphs, labels=train_labels, features=X_train_m)
-            preds, probs = model.predict(graphs=test_graphs, features=X_test_m)
-            metrics = evaluate(test_labels, preds, probs)
-            store_result(all_results, model_name=model.name, fold_id=fold_id, metrics=metrics)
-
-    print(f"  Done {submission_dir.name}          ")
-
-    final_results = aggregate(all_results)
-    save_results(final_results, output_dir, metadata)
-    return final_results, metadata
+    return run_real_submission(
+        submission_dir,
+        label_type=label_type,
+        output_dir=output_dir,
+        device=device,
+        splits_path=splits_path,
+    )
 
 
 def _print_comparison_table(all_method_results: list, label_type: str) -> None:
@@ -541,11 +479,11 @@ def main():
     output_dir.mkdir(parents=True, exist_ok=True)
     device = torch.device(args.device)
 
-    method_dirs = sorted(
-        d for d in submissions_root.iterdir()
-        if d.is_dir() and not d.name.startswith(".")
-    )
+    if not submissions_root.exists():
+        print(f"Submissions directory not found: {submissions_root}")
+        return
 
+    method_dirs = sorted(d for d in submissions_root.iterdir() if d.is_dir() and not d.name.startswith("."))
     if args.methods:
         method_dirs = [d for d in method_dirs if d.name in args.methods]
 
@@ -558,10 +496,14 @@ def main():
 
     splits_path = Path(args.splits) if args.splits else None
 
-    all_method_results = []
-    for method_dir in method_dirs:
-        final_results, metadata = run_single(method_dir, args.label_type, output_dir, device, splits_path)
-        all_method_results.append((final_results, metadata))
+    all_method_results = run_real_collection(
+        submissions_root,
+        label_type=args.label_type,
+        output_dir=output_dir,
+        device=device,
+        methods=args.methods,
+        splits_path=splits_path,
+    )
 
     _print_comparison_table(all_method_results, args.label_type)
     latex_path = output_dir / f"table_{args.label_type}.txt"
