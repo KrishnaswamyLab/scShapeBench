@@ -91,7 +91,11 @@ def load_graphs(submission_dir: Path) -> Tuple[Dict[str, Data], Dict[str, Any]]:
     for sample_dir in sample_dirs:
         num = _parse_sample_id(sample_dir.name)
         key = f"SCD-{num:04d}" if num is not None else sample_dir.name
-        graphs[key] = _load_graph(sample_dir)
+        try:
+            graphs[key] = _load_graph(sample_dir)
+        except FileNotFoundError as e:
+            print(f"Warning: skipping {key} — {e}")
+            continue
 
     metadata: Dict[str, Any] = {
         "submission_dir": str(submission_dir),
