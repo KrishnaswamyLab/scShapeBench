@@ -2,21 +2,40 @@
 name = "scShapeBench"
 version = "0.1.0"
 description = "scShapeBench – Benchmark"
-requires-python = ">=3.10"
+# giotto-tda (the `methods` extra) has no Python 3.13 build.
+requires-python = ">=3.10,<3.13"
 dependencies = [
     "numpy",
     "scipy",
     "scikit-learn",
     "torch",
     "torch-geometric",
+    "networkx",
+    "matplotlib",
+    "huggingface_hub",
 ]
 
-[project.scripts]
-benchmark = "benchmark:main"
+[project.optional-dependencies]
+# Graph-extraction baselines for `run_benchmark_synthetic.py run-methods` and
+# `scripts/build_real_submissions.py`.
+methods = [
+    "anndata",
+    "scanpy",
+    # pynndescent 0.7 returns csr_array, which scanpy 1.11 neighbors() cannot read.
+    "pynndescent<0.7",
+    "leidenalg",
+    "igraph",
+    "kmapper",
+    "giotto-tda==0.6.2",
+    "sc-reeb-tower @ git+https://github.com/KrishnaswamyLab/scReebTower",
+]
 
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+
+[tool.hatch.metadata]
+allow-direct-references = true
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/scshapebench"]

@@ -1,4 +1,4 @@
-"""Run dReeb, smoothed dReeb, PAGA, and Mapper baselines on synthetic data.
+"""Run scReebTower, smoothed scReebTower, PAGA, and Mapper baselines on synthetic data.
 
 The runner processes one sample at a time and compares each recovered graph to
 the contracted ground-truth graph. Method outputs are cached as JSON payloads,
@@ -39,31 +39,32 @@ import scanpy as sc
 
 BENCHMARK_ROOT = Path(__file__).resolve().parents[4]
 PROJECT_ROOT = BENCHMARK_ROOT
-DREEB_SRC = PROJECT_ROOT / "dReeb" / "src"
-for path in (BENCHMARK_ROOT, DREEB_SRC):
-    if str(path) not in sys.path:
-        sys.path.insert(0, str(path))
+if str(BENCHMARK_ROOT) not in sys.path:
+    sys.path.insert(0, str(BENCHMARK_ROOT))
 
+# scReebTower (formerly dReeb) is installed as the ``sc-reeb-tower`` package:
+#   pip install "sc-reeb-tower @ git+https://github.com/KrishnaswamyLab/scReebTower"
 try:
-    from dreeb import dreeb  # type: ignore  # noqa: E402
+    from sc_reeb_tower import scReebTower as screebtower  # type: ignore  # noqa: E402
 except ModuleNotFoundError as exc:  # pragma: no cover - optional method stack
-    dreeb = None
-    _DREEB_IMPORT_ERROR = exc
+    screebtower = None
+    _SCREEBTOWER_IMPORT_ERROR = exc
 else:
-    _DREEB_IMPORT_ERROR = None
+    _SCREEBTOWER_IMPORT_ERROR = None
 from ..evaluation import (  # type: ignore  # noqa: E402
     _load_truth_payload_from_npz,
     build_graph_from_payload,
     evaluate_full_graph_recovery,
+    load_dataset_manifest,
 )
 
 
 TRACKS = ("latent",)
-DREEB_SMOOTH_METHOD = "dreeb_smooth"
-DREEB_SMOOTH_T = "auto"
-DREEB_SMOOTH_K_SMOOTH_MAX = 80
+SCREEBTOWER_SMOOTH_METHOD = "screebtower_smooth"
+SCREEBTOWER_SMOOTH_T = "auto"
+SCREEBTOWER_SMOOTH_K_SMOOTH_MAX = 80
 
-METHODS = ("dreeb", DREEB_SMOOTH_METHOD, "paga", "mapper", "gtda_mapper")
+METHODS = ("screebtower", SCREEBTOWER_SMOOTH_METHOD, "paga", "mapper", "gtda_mapper")
 RESULT_FIELDS = [
     "sample_id",
     "method",
@@ -96,12 +97,15 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--dataset-dir",
-        default=str(BENCHMARK_ROOT / "new1000/full_1000_swept_seed_20260422/dataset"),
-        help="Dataset directory containing manifest.jsonl and samples/*.npz.",
+        default=str(BENCHMARK_ROOT / "data/synthetic"),
+        help=(
+            "Dataset directory containing sample_*.npz/.json (flat or under samples/). "
+            "manifest.jsonl is used when present."
+        ),
     )
     parser.add_argument(
         "--output-dir",
-        default=str(BENCHMARK_ROOT / "method_benchmark/runs/full_1000_swept"),
+        default=str(BENCHMARK_ROOT / "results/method_benchmark"),
         help="Directory for cached method outputs and result tables.",
     )
     parser.add_argument("--start", type=int, default=0, help="First manifest row to process.")
@@ -114,12 +118,12 @@ def parse_args() -> argparse.Namespace:
         help="Methods to run.",
     )
     parser.add_argument("--force", action="store_true", help="Regenerate cached method outputs.")
-    parser.add_argument("--dreeb-k", type=int, default=15, help="k for dReeb point-cloud affinity.")
+    parser.add_argument("--screebtower-k", type=int, default=15, help="k for scReebTower point-cloud affinity.")
     parser.add_argument(
-        "--dreeb-filter-method",
+        "--screebtower-filter-method",
         default="diffusion_eigenfunction",
         choices=["diffusion_eigenfunction", "rooted_potential_distance", "rooted_diffusion_shortest_path"],
-        help="dReeb scalar filter method for point-cloud outputs.",
+        help="scReebTower scalar filter method for point-cloud outputs.",
     )
     parser.add_argument("--paga-knn", type=int, default=15, help="kNN size for PAGA-style connectivity.")
     parser.add_argument("--paga-resolution", type=float, default=1.0, help="Leiden resolution before Scanpy PAGA.")
@@ -157,7 +161,15 @@ def main() -> None:
     output_dir.mkdir(parents=True, exist_ok=True)
     cache_dir.mkdir(parents=True, exist_ok=True)
 
-    manifest = load_manifest(dataset_dir / "manifest.jsonl")
+    needs_screebtower = {"screebtower", SCREEBTOWER_SMOOTH_METHOD} & set(args.methods)
+    if needs_screebtower and screebtower is None:
+        raise SystemExit(
+            f"{', '.join(sorted(needs_screebtower))} requested but sc-reeb-tower is not installed. "
+            'Install it with: pip install "sc-reeb-tower @ git+https://github.com/KrishnaswamyLab/scReebTower" '
+            "or drop it from --methods."
+        )
+
+    manifest = load_dataset_manifest(dataset_dir)
     selected = manifest[args.start :]
     if args.limit is not None:
         selected = selected[: args.limit]
@@ -213,16 +225,6 @@ def main() -> None:
         print(f"wrote: {output_dir / 'track_latent_random_sample.pdf'}", flush=True)
 
 
-def load_manifest(path: Path) -> list[dict[str, Any]]:
-    entries = []
-    with path.open("r", encoding="utf-8") as handle:
-        for line in handle:
-            stripped = line.strip()
-            if stripped:
-                entries.append(json.loads(stripped))
-    return entries
-
-
 def load_sample(path: Path) -> dict[str, Any]:
     with np.load(path, allow_pickle=False) as data:
         return {
@@ -258,10 +260,10 @@ def build_pointcloud_payload(
     sample: dict[str, Any],
     args: argparse.Namespace,
 ) -> dict[str, Any]:
-    if method == "dreeb":
-        return build_dreeb_pointcloud_payload(sample["noisy_points"], args)
-    if method == DREEB_SMOOTH_METHOD:
-        return build_dreeb_smoothed_pointcloud_payload(sample["noisy_points"], args)
+    if method == "screebtower":
+        return build_screebtower_pointcloud_payload(sample["noisy_points"], args)
+    if method == SCREEBTOWER_SMOOTH_METHOD:
+        return build_screebtower_smoothed_pointcloud_payload(sample["noisy_points"], args)
     if method == "paga":
         return build_paga_payload(sample["noisy_points"], args)
     if method == "mapper":
@@ -271,16 +273,16 @@ def build_pointcloud_payload(
     raise ValueError(f"Unsupported method: {method}")
 
 
-def build_dreeb_pointcloud_payload(points: np.ndarray, args: argparse.Namespace) -> dict[str, Any]:
-    if dreeb is None:
+def build_screebtower_pointcloud_payload(points: np.ndarray, args: argparse.Namespace) -> dict[str, Any]:
+    if screebtower is None:
         raise RuntimeError(
-            "Running the dreeb synthetic method requires the optional dreeb package."
-        ) from _DREEB_IMPORT_ERROR
-    result = dreeb(
+            "Running the screebtower synthetic method requires the sc-reeb-tower package (pip install \"sc-reeb-tower @ git+https://github.com/KrishnaswamyLab/scReebTower\")."
+        ) from _SCREEBTOWER_IMPORT_ERROR
+    result = screebtower(
         X=points,
-        k=int(args.dreeb_k),
+        k=int(args.screebtower_k),
         precision=1.0,
-        filter_method=args.dreeb_filter_method,
+        filter_method=args.screebtower_filter_method,
         simplify=True,
         return_edge_lengths=True,
     )
@@ -297,29 +299,29 @@ def build_dreeb_pointcloud_payload(points: np.ndarray, args: argparse.Namespace)
         "edges": edges,
         "edge_lengths": [float(value) for value in graph.get("edge_lengths", [])],
         "method_metadata": {
-            "method": "dreeb",
+            "method": "screebtower",
             "input": "pointcloud",
-            "k": int(args.dreeb_k),
-            "filter_method": args.dreeb_filter_method,
+            "k": int(args.screebtower_k),
+            "filter_method": args.screebtower_filter_method,
         },
     }
 
 
-def build_dreeb_smoothed_pointcloud_payload(points: np.ndarray, args: argparse.Namespace) -> dict[str, Any]:
-    if dreeb is None:
+def build_screebtower_smoothed_pointcloud_payload(points: np.ndarray, args: argparse.Namespace) -> dict[str, Any]:
+    if screebtower is None:
         raise RuntimeError(
-            "Running the dreeb_smooth synthetic method requires the optional dreeb package."
-        ) from _DREEB_IMPORT_ERROR
+            "Running the screebtower_smooth synthetic method requires the sc-reeb-tower package (pip install \"sc-reeb-tower @ git+https://github.com/KrishnaswamyLab/scReebTower\")."
+        ) from _SCREEBTOWER_IMPORT_ERROR
     points = np.asarray(points, dtype=float)
     n = points.shape[0]
-    k_smooth = max(1, min(int(DREEB_SMOOTH_K_SMOOTH_MAX), max(1, n - 1)))
-    result = dreeb(
+    k_smooth = max(1, min(int(SCREEBTOWER_SMOOTH_K_SMOOTH_MAX), max(1, n - 1)))
+    result = screebtower(
         X=points,
-        k=int(args.dreeb_k),
+        k=int(args.screebtower_k),
         k_smooth=int(k_smooth),
-        t=DREEB_SMOOTH_T,
+        t=SCREEBTOWER_SMOOTH_T,
         precision=1.0,
-        filter_method=args.dreeb_filter_method,
+        filter_method=args.screebtower_filter_method,
         simplify=True,
         return_edge_lengths=True,
     )
@@ -336,12 +338,12 @@ def build_dreeb_smoothed_pointcloud_payload(points: np.ndarray, args: argparse.N
         "edges": edges,
         "edge_lengths": [float(value) for value in graph.get("edge_lengths", [])],
         "method_metadata": {
-            "method": DREEB_SMOOTH_METHOD,
+            "method": SCREEBTOWER_SMOOTH_METHOD,
             "input": "pointcloud",
-            "k": int(args.dreeb_k),
+            "k": int(args.screebtower_k),
             "k_smooth": int(k_smooth),
-            "t": DREEB_SMOOTH_T,
-            "filter_method": args.dreeb_filter_method,
+            "t": SCREEBTOWER_SMOOTH_T,
+            "filter_method": args.screebtower_filter_method,
         },
     }
 
@@ -579,7 +581,7 @@ def payload_from_multigraph(graph: nx.MultiGraph) -> dict[str, Any]:
         "edges": edges,
         "edge_lengths": edge_lengths,
         "method_metadata": {
-            "method": "dreeb",
+            "method": "screebtower",
             "input": "latent_graph",
         },
     }
@@ -875,7 +877,7 @@ def load_cached_payload_optional(
 
 def method_label(method: str) -> str:
     labels = {
-        "dreeb": "dReeb(X)",
+        "screebtower": "scReebTower(X)",
         "paga": "Scanpy PAGA(X)",
         "mapper": "KeplerMapper(X)",
         "gtda_mapper": "giotto-tda Mapper(X)",

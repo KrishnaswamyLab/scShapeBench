@@ -1036,7 +1036,7 @@ def _union_geometry_stats(
     graph: nx.Graph,
     pos: dict[int, np.ndarray],
 ) -> dict[str, float]:
-    from geometry_nd import validate_embedding_nd
+    from .geometry_nd import validate_embedding_nd
 
     _, stats = validate_embedding_nd(
         G=graph,

@@ -498,13 +498,10 @@ def evaluate_dataset_predictions(
 
     dataset_path = Path(dataset_dir)
     predictions_path = Path(predictions_dir)
-    manifest_path = dataset_path / "manifest.jsonl"
-    if not manifest_path.is_file():
-        raise ValueError(f"Missing dataset manifest: {manifest_path}")
     if not predictions_path.is_dir():
         raise ValueError(f"Predictions directory does not exist: {predictions_path}")
 
-    manifest_entries = _load_manifest(manifest_path)
+    manifest_entries = load_dataset_manifest(dataset_path)
     per_sample_results: list[dict[str, Any]] = []
 
     for entry in manifest_entries:
@@ -1396,6 +1393,56 @@ def _load_manifest(path: Path) -> list[dict[str, Any]]:
     return entries
 
 
+_MANIFEST_FIELDS_FROM_SAMPLE_JSON = (
+    "sample_id",
+    "difficulty",
+    "difficulty_coordinate",
+    "normalized_difficulty_coordinate",
+    "actual_normalized_difficulty_coordinate",
+    "actual_difficulty_coordinate",
+    "difficulty_vector_magnitude",
+    "difficulty_relaxation_factor",
+    "realized_geometry",
+    "graph_summary",
+    "embedding_dimension",
+)
+
+
+def load_dataset_manifest(dataset_dir: str | Path) -> list[dict[str, Any]]:
+    """Load ``manifest.jsonl``, or rebuild it from the per-sample JSON sidecars.
+
+    The HuggingFace release ships ``sample_XXXXX.{npz,json}`` without a
+    manifest, either flat in the dataset directory or under ``samples/``.
+    """
+
+    dataset_path = Path(dataset_dir)
+    manifest_path = dataset_path / "manifest.jsonl"
+    if manifest_path.is_file():
+        return _load_manifest(manifest_path)
+
+    npz_paths = sorted(dataset_path.glob("sample_*.npz")) or sorted(
+        (dataset_path / "samples").glob("sample_*.npz")
+    )
+    if not npz_paths:
+        raise ValueError(
+            f"Missing dataset manifest: {manifest_path} (and no sample_*.npz files to rebuild it from)."
+        )
+
+    entries = []
+    for npz_path in npz_paths:
+        json_path = npz_path.with_suffix(".json")
+        if not json_path.is_file():
+            raise ValueError(f"Missing sample metadata JSON next to {npz_path}.")
+        metadata = json.loads(json_path.read_text(encoding="utf-8"))
+        entry = {key: metadata[key] for key in _MANIFEST_FIELDS_FROM_SAMPLE_JSON if key in metadata}
+        entry.setdefault("sample_id", int(npz_path.stem.rsplit("_", 1)[-1]))
+        entry["npz_path"] = npz_path.relative_to(dataset_path).as_posix()
+        entry["json_path"] = json_path.relative_to(dataset_path).as_posix()
+        entries.append(entry)
+    entries.sort(key=lambda entry: int(entry["sample_id"]))
+    return entries
+
+
 def _resolve_prediction_path(
     *,
     predictions_dir: Path,
@@ -2046,7 +2093,16 @@ def _render_dataset_manifold(
     epsilon: float | None,
     candidate_dims: int,
 ) -> None:
-    from .render_diffusion_difficulty_manifold import render_diffusion_difficulty_manifold
+    try:
+        from .render_diffusion_difficulty_manifold import render_diffusion_difficulty_manifold
+    except ModuleNotFoundError as exc:
+        # The report and LaTeX table are already written; the figure is optional.
+        print(
+            f"warning: skipping difficulty-manifold figure ({exc}); "
+            "install matplotlib or pass --skip-manifold-render.",
+            file=sys.stderr,
+        )
+        return
 
     render_diffusion_difficulty_manifold(
         report_data=report,

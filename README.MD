@@ -25,123 +25,127 @@ Synthetic evaluation asks whether a method recovers the contracted ground-truth 
 
 ## Installation
 
+Python 3.10–3.12 (giotto-tda, used by the method baselines, has no 3.13 build).
+
 ```bash
-pip install -e .
+git clone https://github.com/KrishnaswamyLab/scShapeBench
+cd scShapeBench
+uv sync --extra methods          # or: pip install -e ".[methods]"
+source .venv/bin/activate
 ```
+
+The core install is enough to *evaluate* submissions. The `methods` extra adds the
+graph-extraction baselines (scReebTower, Scanpy PAGA, KeplerMapper, giotto-tda Mapper);
+scReebTower (formerly dReeb) is installed from
+[KrishnaswamyLab/scReebTower](https://github.com/KrishnaswamyLab/scReebTower).
 
 ---
 
 ## Data
 
-Real scRNA-seq annotations are loaded from the repository's benchmark data and are evaluated with the `high_support` label set by default.
+All data is on Hugging Face at
+[`scShape-Benchmark/scShapeBench`](https://huggingface.co/datasets/scShape-Benchmark/scShapeBench).
+`scripts/download_data.py` keeps the repo paths, so files land under `./data/`:
 
-Synthetic benchmark data is distributed separately as a release bundle and should be unpacked so the dataset directory contains:
+```bash
+python scripts/download_data.py                              # synthetic set → data/synthetic (46 MB)
+python scripts/download_data.py --ids SCD-0010 SCD-0014      # chosen scRNAseq datasets → data/scRNAseq
+python scripts/download_data.py --subset sample              # 9-dataset subset → data/sample (2.6 GB)
+python scripts/download_data.py --subset scRNAseq            # all 105 datasets (~116 GB)
+```
 
-- `manifest.jsonl`
-- `dataset_config.json`
-- `samples/*.npz`
-- `samples/*.json`
-
-The shipped synthetic bundle is the `new1000` release, reindexed to a contiguous `0..999` naming scheme.
+- **Synthetic**: 1000 samples, `sample_00000`–`sample_00999`, each a `.npz` (graph,
+  positions, clean/noisy point cloud) plus a `.json` metadata sidecar. No
+  `manifest.jsonl` is needed; it is rebuilt from the sidecars when absent.
+- **Real**: one `.h5ad` per dataset with the cell embedding in `obsm["X_pca"]`.
+  Expert labels ship in this repo under `benchmarks/scrnaseq/labels/`; the
+  `high_support` label set is the default.
 
 ---
 
 ## Real-data submission format
 
-For the real scRNA-seq track, submit one graph per sample:
+One directory per method, one subdirectory per dataset:
 
 ```text
-my_submission/
-├── SCD-0001/
-│   ├── nodes.csv
-│   ├── edges.csv
-│   ├── h0_finite.csv      # optional
-│   └── h1_essential.csv   # optional
-├── SCD-0002/
-│   ├── nodes.csv
-│   └── edges.csv
-└── ...
+submissions/scRNAseq/
+├── my_method/
+│   ├── SCD-0001/
+│   │   ├── nodes.csv          # node,x,y        (x, y are read; the id column name is free)
+│   │   ├── edges.csv          # source,target,length
+│   │   ├── h0_finite.csv      # optional: death column
+│   │   └── h1_essential.csv   # optional: birth column
+│   └── SCD-0002/ ...
+└── another_method/ ...
 ```
 
-Requirements:
+- `source`/`target` index rows of `nodes.csv` (0-based). Extra columns are ignored.
+- Folder names like `1` or `SC-001` are normalized to `SCD-0001`.
+- Graphs without a label (and labels without a graph) are skipped with a warning.
 
-- one graph per sample
-- sample IDs must match benchmark IDs after normalization
-- `nodes.csv` columns: `id,x,y`
-- `edges.csv` columns: `source,target,length`
-- optional persistence files use one value per row:
-  - `h0_finite.csv` with `death`
-  - `h1_essential.csv` with `birth`
-
-The loader accepts folder names like `1` or `SC-001` and normalizes them to `SCD-0001`.
+`scripts/build_real_submissions.py` writes this layout for scReebTower, PAGA and Mapper
+from the `.h5ad` files.
 
 ---
 
 ## Synthetic submission format
 
-For synthetic evaluation, submit one JSON file per sample, using the same graph payload schema as the generated benchmark data.
+One JSON per sample named `sample_XXXXX.json` (or `XXXXX.json`), with:
 
-The evaluator reads:
+- `nodes`: list of node ids
+- `edges`: list of `[u, v]` pairs
+- `node_positions`: `{node_id: [x, y, ...]}` (or a list aligned with `nodes`)
 
-- `nodes`
-- `edges`
-- `node_positions`
-
-The rest of the benchmark bundle is used for truth loading and scoring.
+Every sample in the dataset needs a prediction; `evaluate` stops at the first missing one.
 
 ---
 
 ## Running the benchmark
 
-Use the unified dispatcher:
-
 ### Real track
 
-All methods:
-
 ```bash
-python run_benchmark.py \
-  --track real \
-  --real-mode all \
-  --submissions-dir submissions/submissions/scRNAseq \
-  --label-type high_support \
-  --splits splits/folds_v1.json \
-  --output results/high_support \
-  --device cpu
-```
+# 1. build graphs (skip if you bring your own submissions)
+python scripts/build_real_submissions.py --data-dir data/scRNAseq --output-dir submissions/scRNAseq
 
-Single submission:
+# 2. evaluate every method folder
+python run_benchmark.py --track real --real-mode all \
+  --submissions-dir submissions/scRNAseq \
+  --label-type high_support --splits splits/folds_v1.json \
+  --output results/real --device cpu
 
-```bash
-python run_benchmark.py \
-  --track real \
-  --real-mode single \
-  --submission submissions/submissions/scRNAseq/paga \
-  --label-type high_support \
-  --splits splits/folds_v1.json \
-  --output results/high_support_single \
-  --device cpu
+# or one method
+python run_benchmark.py --track real --real-mode single \
+  --submission submissions/scRNAseq/paga \
+  --label-type high_support --splits splits/folds_v1.json \
+  --output results/real_paga --device cpu
 ```
 
 ### Synthetic track
 
-Evaluate one prediction directory against the shipped dataset:
-
-```bash
-python run_benchmark.py \
-  --track synthetic evaluate dataset \
-  --dataset-dir /path/to/full_1000_swept_seed_20260422/dataset \
-  --predictions-dir /path/to/predictions \
-  --output-path results/synthetic_eval.json
-```
-
-Run the synthetic method benchmark:
+Run the baselines and score them in one step:
 
 ```bash
 python run_benchmark_synthetic.py run-methods \
-  --dataset-dir /path/to/full_1000_swept_seed_20260422/dataset \
-  --output-dir results/method_benchmark
+  --dataset-dir data/synthetic \
+  --methods screebtower paga mapper \
+  --output-dir results/methods
 ```
+
+Add `--limit N` for a quick check. Outputs are cached per sample, so reruns are cheap.
+
+Score your own predictions:
+
+```bash
+python run_benchmark.py --track synthetic evaluate dataset \
+  --dataset-dir data/synthetic \
+  --predictions-dir my_predictions \
+  --output-path results/synthetic_eval.json
+```
+
+Other synthetic commands: `generate` (make a new dataset), `evaluate sample`
+(score one prediction), `run-swept-methods` (the default; `run-methods` with all
+five baselines).
 
 ---
 
@@ -149,7 +153,7 @@ python run_benchmark_synthetic.py run-methods \
 
 ### Real track
 
-Real-data runs write:
+`--real-mode all` writes the files below; `--real-mode single` writes only `results_*.json`.
 
 - `summary_<label_type>.csv`
 - `table_<label_type>.txt`
@@ -220,12 +224,6 @@ Top-level entrypoints:
 - `run_benchmark_all.py`
 - `run_benchmark_single_cell.py`
 - `run_benchmark_synthetic.py`
-
----
-
-## Example
-
-See `examples/dummy_submission/` for a minimal real-data submission.
 
 ---
 
