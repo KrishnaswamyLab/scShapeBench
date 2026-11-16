@@ -21,8 +21,8 @@ from .loader import load_graphs
 from .metrics import aggregate, evaluate
 from .validator import validate_submission
 from ..datasets.labels import load_labels
-from ..features.graph_stats import extract_features as extract_graph_features
-from ..features.persistence import extract_features as extract_persistence_features
+from ..features.graph_stats import _graph_to_features as graph_stats_vector
+from ..features.persistence import _graph_to_features as persistence_vector
 from ..models import get_models
 
 LABEL_PATHS = {
@@ -104,10 +104,25 @@ def run_real_submission(
         print("Using generated folds over evaluable graph/label IDs")
         splits = make_folds({sid: graphs[sid] for sid in evaluable_ids}, k=5, seed=fold_seed)
 
+    # Per-graph features don't depend on the fold, so compute them once and
+    # stack per fold (identical values to computing them inside every fold).
+    feature_vectors = {
+        "persistence": {sid: persistence_vector(graphs[sid]) for sid in sorted(evaluable_ids)},
+        "graph_stats": {sid: graph_stats_vector(graphs[sid]) for sid in sorted(evaluable_ids)},
+    }
+
     all_results: dict[str, Any] = {}
+    skipped_folds: list[int] = []
     for fold_id, split in enumerate(splits):
         train_ids = filter_split_ids(split["train"], evaluable_ids, "train")
         test_ids = filter_split_ids(split["test"], evaluable_ids, "test")
+        if not train_ids or not test_ids:
+            print(
+                f"Warning: skipping fold {fold_id}: {len(train_ids)} train / {len(test_ids)} test "
+                "dataset(s) have both a graph and a label."
+            )
+            skipped_folds.append(fold_id)
+            continue
 
         train_graphs = [graphs[i] for i in train_ids]
         test_graphs = [graphs[i] for i in test_ids]
@@ -118,8 +133,8 @@ def run_real_submission(
             raise RuntimeError("Internal ID alignment error between graphs and labels.")
 
         features_cache = {
-            "persistence": extract_persistence_features(train_graphs, test_graphs),
-            "graph_stats": extract_graph_features(train_graphs, test_graphs),
+            name: (np.stack([vectors[i] for i in train_ids]), np.stack([vectors[i] for i in test_ids]))
+            for name, vectors in feature_vectors.items()
         }
 
         for baseline_name, (preds, probs) in baseline_predictions(
@@ -146,6 +161,16 @@ def run_real_submission(
                 fold_id=fold_id,
                 metrics=evaluate(test_labels, preds, probs),
             )
+
+    if not all_results:
+        raise ValueError(
+            "No fold has both train and test datasets with graphs and labels; "
+            "submit graphs for more datasets or omit the predefined splits."
+        )
+    metadata["n_evaluable_datasets"] = len(evaluable_ids)
+    metadata["n_labeled_datasets"] = len(dataset_order)
+    metadata["folds_evaluated"] = len(splits) - len(skipped_folds)
+    metadata["folds_skipped"] = skipped_folds
 
     final_results = aggregate(all_results)
     save_results(final_results, output_dir, metadata)

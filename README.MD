@@ -57,9 +57,83 @@ python scripts/download_data.py --subset scRNAseq            # all 105 datasets 
 - **Synthetic**: 1000 samples, `sample_00000`–`sample_00999`, each a `.npz` (graph,
   positions, clean/noisy point cloud) plus a `.json` metadata sidecar. No
   `manifest.jsonl` is needed; it is rebuilt from the sidecars when absent.
-- **Real**: one `.h5ad` per dataset with the cell embedding in `obsm["X_pca"]`.
-  Expert labels ship in this repo under `benchmarks/scrnaseq/labels/`; the
-  `high_support` label set is the default.
+- **Real**: one `.h5ad` per dataset with the cell embedding in `obsm["X_pca"]`
+  (`SCD-0074` currently has only `obsm["X_umap"]`; the builders skip it).
+  Expert labels ship in this repo under `benchmarks/scrnaseq/labels/`. The
+  commands below use the `high_support` label set; always pass `--label-type`,
+  because the two real-track entrypoints default to different label sets.
+
+---
+
+## Tutorial: benchmark a kNN graph
+
+This walks through the whole real track on the 9-dataset sample with the simplest
+possible method: a k-nearest-neighbour graph (k = 2) over the cells. Run every
+command from the repository root.
+
+**1. Install and download the sample** (2.6 GB):
+
+```bash
+uv sync --extra methods && source .venv/bin/activate
+python scripts/download_data.py --subset sample
+```
+
+**2. Build the graphs.** [`examples/knn_submission.py`](examples/knn_submission.py)
+makes one node per cell, joins each cell to its 2 nearest neighbours in
+`obsm["X_pca"]`, and writes one folder per dataset (a few seconds):
+
+```bash
+python examples/knn_submission.py --data-dir data/sample --output-dir submissions/scRNAseq/knn2
+```
+
+```text
+SCD-0002: 8368 nodes, 13760 edges
+...
+SCD-0071: 18890 nodes, 33138 edges
+SCD-0074: skipped (no obsm['X_pca'])
+```
+
+Each folder holds `nodes.csv`, `edges.csv`, `h0_finite.csv` and `h1_essential.csv`
+(see [Real-data submission format](#real-data-submission-format)). To benchmark your
+own method, replace the block marked *your method* in the script: it only needs
+node positions and a list of `(source, target, length)` edges.
+
+**3. Score them** (about 2 minutes on a laptop CPU):
+
+```bash
+python run_benchmark.py --track real --real-mode single \
+  --submission submissions/scRNAseq/knn2 \
+  --label-type high_support --splits splits/folds_v1.json \
+  --output results/knn2 --device cpu
+```
+
+Each fixed model (`gnn`, `mlp`, `pi_svm`, `stats_svm`, `rf`) and four graph-free
+baselines are trained and tested over the predefined folds. The console prints
+mean ± std per shape class (`CLUSTERS`, `SINGLE_TRAJECTORY`, `MULTI_BRANCHING`,
+`ARCHETYPAL`), and `results/knn2/results_<timestamp>.json` stores the same scores
+plus per-fold values; the overall metrics are under
+`results → <model> → __summary__` (`macro_auprc_mean`, `macro_auc_mean`,
+`macro_balanced_accuracy_mean`).
+
+**4. Compare against the baselines** (optional, about 4 minutes to build):
+
+```bash
+python scripts/build_real_submissions.py --data-dir data/sample --output-dir submissions/scRNAseq
+python run_benchmark.py --track real --real-mode all \
+  --submissions-dir submissions/scRNAseq \
+  --label-type high_support --splits splits/folds_v1.json \
+  --output results/all --device cpu
+```
+
+This scores every method folder (`knn2`, `paga`, `mapper`, `screebtower`) and also
+writes `summary_high_support.csv` and LaTeX tables (see [Outputs](#outputs)).
+
+> **The sample is for checking that everything runs, not for comparing methods.**
+> It covers 8 of the 79 labelled datasets, so the scorer warns about missing labels
+> and skips fold 3, whose only test dataset is `SCD-0074`. The results JSON records
+> this under `metadata` (`n_evaluable_datasets`, `folds_evaluated`, `folds_skipped`).
+> For real numbers, build graphs for all labelled datasets
+> (`python scripts/download_data.py --subset scRNAseq`).
 
 ---
 

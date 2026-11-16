@@ -15,9 +15,38 @@ from typing import List
 
 import networkx as nx
 import numpy as np
+from scipy.sparse import csr_matrix
+from scipy.sparse.csgraph import shortest_path
 from torch_geometric.data import Data
 
 FEAT_DIM = 16
+
+_BFS_CHUNK = 256  # source nodes per shortest-path batch (bounds memory to chunk × n)
+
+
+def _hop_diameter_and_total(G: nx.Graph) -> tuple[int, int]:
+    """Diameter and sum of all-pairs hop distances of a connected graph.
+
+    Same values as ``nx.diameter`` and summing ``nx.all_pairs_shortest_path_length``,
+    but computed with batched BFS in scipy so graphs with one node per cell
+    (tens of thousands of nodes) don't need O(n²) Python dicts.
+    """
+    nodes = list(G.nodes())
+    index = {node: i for i, node in enumerate(nodes)}
+    n = len(nodes)
+    rows = [index[u] for u, v in G.edges()]
+    cols = [index[v] for u, v in G.edges()]
+    adj = csr_matrix((np.ones(len(rows)), (rows, cols)), shape=(n, n))
+
+    diam, total = 0, 0
+    for start in range(0, n, _BFS_CHUNK):
+        dist = shortest_path(adj, directed=False, unweighted=True, indices=np.arange(start, min(start + _BFS_CHUNK, n)))
+        if not np.isfinite(dist).all():
+            raise nx.NetworkXError("Graph is not connected.")
+        hops = dist.astype(np.int64)
+        diam = max(diam, int(hops.max()))
+        total += int(hops.sum())
+    return diam, total
 
 
 def _graph_to_features(g: Data) -> np.ndarray:
@@ -74,9 +103,7 @@ def _graph_to_features(g: Data) -> np.ndarray:
     n_large = len(largest)
     if n_large > 1:
         try:
-            diam      = nx.diameter(subG)
-            pair_lens = dict(nx.all_pairs_shortest_path_length(subG))
-            total     = sum(v for row in pair_lens.values() for v in row.values())
+            diam, total = _hop_diameter_and_total(subG)
             n_pairs   = n_large * (n_large - 1)
             mean_path = total / n_pairs if n_pairs > 0 else 0.0
             diam_norm = diam     / n_large
