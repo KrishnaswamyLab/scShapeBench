@@ -29,13 +29,23 @@ parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.R
 parser.add_argument("--data-dir", type=Path, default=ROOT / "data/sample", help="Directory of SCD-XXXX.h5ad files.")
 parser.add_argument("--output-dir", type=Path, default=ROOT / "submissions/scRNAseq/knn2", help="Method folder to write.")
 parser.add_argument("--k", type=int, default=2, help="Neighbours per cell.")
+parser.add_argument("--ids", nargs="+", default=None, help="Only these dataset IDs (default: every .h5ad).")
+parser.add_argument("--force", action="store_true", help="Rebuild graphs that already exist.")
 args = parser.parse_args()
 
 paths = sorted(args.data_dir.glob("SCD-*.h5ad"))
+if args.ids:
+    paths = [path for path in paths if path.stem in set(args.ids)]
+    missing = set(args.ids) - {path.stem for path in paths}
+    if missing:
+        raise SystemExit(f"No .h5ad for: {', '.join(sorted(missing))} in {args.data_dir}")
 if not paths:
     raise SystemExit(f"No SCD-*.h5ad files in {args.data_dir}")
 
 for path in paths:
+    if not args.force and (args.output_dir / path.stem / "h1_essential.csv").is_file():
+        print(f"{path.stem}: cached")
+        continue
     adata = ad.read_h5ad(path, backed="r")
     if "X_pca" not in adata.obsm:
         print(f"{path.stem}: skipped (no obsm['X_pca'])")

@@ -36,7 +36,7 @@ source .venv/bin/activate
 
 The core install is enough to *evaluate* submissions. The `methods` extra adds the
 graph-extraction baselines (scReebTower, Scanpy PAGA, KeplerMapper, giotto-tda Mapper);
-scReebTower (formerly dReeb) is installed from
+scReebTower is installed from
 [KrishnaswamyLab/scReebTower](https://github.com/KrishnaswamyLab/scReebTower).
 
 ---
@@ -57,8 +57,9 @@ python scripts/download_data.py --subset scRNAseq            # all 105 datasets 
 - **Synthetic**: 1000 samples, `sample_00000`–`sample_00999`, each a `.npz` (graph,
   positions, clean/noisy point cloud) plus a `.json` metadata sidecar. No
   `manifest.jsonl` is needed; it is rebuilt from the sidecars when absent.
-- **Real**: one `.h5ad` per dataset with the cell embedding in `obsm["X_pca"]`
-  (`SCD-0074` currently has only `obsm["X_umap"]`; the builders skip it).
+- **Real**: one `.h5ad` per dataset with the cell embedding in `obsm["X_pca"]`.
+  16 of the 79 labelled datasets (including `SCD-0074` in the sample) have no
+  `X_pca`; the builders skip them (see [docs/running_on_hpc.md](docs/running_on_hpc.md#datasets-without-x_pca)).
   Expert labels ship in this repo under `benchmarks/scrnaseq/labels/`. The
   commands below use the `high_support` label set; always pass `--label-type`,
   because the two real-track entrypoints default to different label sets.
@@ -80,7 +81,7 @@ python scripts/download_data.py --subset sample
 
 **2. Build the graphs.** [`examples/knn_submission.py`](examples/knn_submission.py)
 makes one node per cell, joins each cell to its 2 nearest neighbours in
-`obsm["X_pca"]`, and writes one folder per dataset (a few seconds):
+`obsm["X_pca"]`, and writes one folder per dataset:
 
 ```bash
 python examples/knn_submission.py --data-dir data/sample --output-dir submissions/scRNAseq/knn2

@@ -129,13 +129,18 @@ def write_graph(sample_dir: Path, positions: dict, edges: list, points: np.ndarr
         writer.writerow(["source", "target", "length"])
         writer.writerows(edges)
 
+    write_persistence(sample_dir, list(positions), edges)
+
+
+def write_persistence(sample_dir: Path, nodes: list, edges: list) -> None:
+    """Write h0_finite.csv and h1_essential.csv for a graph's edge-length filtration."""
     # The real-track scorer (features/persistence.py) expects values divided by the
     # graph's longest edge, i.e. in [0, 1]; the synthetic track's median scaling
     # would push values past 1, where the persistence images drop them.
     lengths = [length for _, _, length in edges if np.isfinite(length) and length > 0]
     scale = max(lengths) if lengths else 1.0
     multigraph = nx.MultiGraph()
-    multigraph.add_nodes_from(positions)
+    multigraph.add_nodes_from(nodes)
     for u, v, length in edges:
         multigraph.add_edge(u, v, length=length / scale)
     diagrams = compute_reduced_multigraph_persistence_diagrams(multigraph, normalize_edge_lengths=False)
@@ -169,7 +174,11 @@ def main() -> None:
         if not todo:
             print(f"[{sample_id}] cached", flush=True)
             continue
-        points = load_embedding(path, args.rep, args.n_dims)
+        try:
+            points = load_embedding(path, args.rep, args.n_dims)
+        except ValueError as exc:  # embedding missing: skip, as examples/knn_submission.py does
+            print(f"[{sample_id}] skipped: {exc}", flush=True)
+            continue
         print(f"[{sample_id}] {points.shape[0]} cells x {points.shape[1]} dims", flush=True)
         for method in todo:
             if method == "screebtower":
