@@ -12,6 +12,7 @@ build/
 
 # Virtual environments
 .venv/
+.venv-*/
 venv/
 env/
 
@@ -41,3 +42,5 @@ submissions/
 submissions.zip
 benchmarks/scrnaseq/annotations.zip
 data/
+# Internal notes (not distributed)
+docs/known_issues.md

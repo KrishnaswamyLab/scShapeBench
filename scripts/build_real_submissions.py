@@ -13,8 +13,7 @@ Methods run on the cell embedding in ``obsm[--rep]`` (default ``X_pca``) and
 reuse the synthetic-track builders, so parameters mean the same thing on both
 tracks. Node ``x, y`` are the node centroids' first two embedding coordinates,
 min-max scaled to [0, 1] over the cells. Persistence uses the edge-length
-filtration with lengths divided by the graph's longest edge, so ``death`` and
-``birth`` lie in [0, 1] as ``features/persistence.py`` expects; the ``raw_*``
+filtration with lengths divided by the graph's median edge length; the ``raw_*``
 columns keep the unscaled lengths.
 """
 
@@ -133,17 +132,14 @@ def write_graph(sample_dir: Path, positions: dict, edges: list, points: np.ndarr
 
 
 def write_persistence(sample_dir: Path, nodes: list, edges: list) -> None:
-    """Write h0_finite.csv and h1_essential.csv for a graph's edge-length filtration."""
-    # The real-track scorer (features/persistence.py) expects values divided by the
-    # graph's longest edge, i.e. in [0, 1]; the synthetic track's median scaling
-    # would push values past 1, where the persistence images drop them.
-    lengths = [length for _, _, length in edges if np.isfinite(length) and length > 0]
-    scale = max(lengths) if lengths else 1.0
+    """Write h0_finite.csv and h1_essential.csv for a graph's edge-length filtration
+    (lengths divided by the graph's median edge length)."""
     multigraph = nx.MultiGraph()
     multigraph.add_nodes_from(nodes)
     for u, v, length in edges:
-        multigraph.add_edge(u, v, length=length / scale)
-    diagrams = compute_reduced_multigraph_persistence_diagrams(multigraph, normalize_edge_lengths=False)
+        multigraph.add_edge(u, v, length=length)
+    diagrams = compute_reduced_multigraph_persistence_diagrams(multigraph, normalize_edge_lengths=True)
+    scale = diagrams["edge_length_scale"]
 
     with open(sample_dir / "h0_finite.csv", "w", newline="") as handle:
         writer = csv.writer(handle)

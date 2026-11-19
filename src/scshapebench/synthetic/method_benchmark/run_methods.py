@@ -27,7 +27,6 @@ from sklearn.decomposition import PCA
 from sklearn.neighbors import NearestNeighbors
 
 import anndata as ad
-from gtda.mapper import CubicalCover, make_mapper_pipeline
 import kmapper as km
 import matplotlib
 
@@ -44,6 +43,13 @@ if str(BENCHMARK_ROOT) not in sys.path:
 
 # scReebTower (formerly dReeb) is installed as the ``sc-reeb-tower`` package:
 #   pip install "sc-reeb-tower @ git+https://github.com/KrishnaswamyLab/scReebTower"
+# giotto-tda is not a project dependency: its only release for Python 3.12 pins
+# scikit-learn==1.3.2. Install it in a separate environment to run gtda_mapper.
+try:
+    from gtda.mapper import CubicalCover, make_mapper_pipeline  # type: ignore  # noqa: E402
+except ModuleNotFoundError:  # pragma: no cover - optional method stack
+    CubicalCover = make_mapper_pipeline = None
+
 try:
     from sc_reeb_tower import scReebTower as screebtower  # type: ignore  # noqa: E402
 except ModuleNotFoundError as exc:  # pragma: no cover - optional method stack
@@ -167,6 +173,13 @@ def main() -> None:
             f"{', '.join(sorted(needs_screebtower))} requested but sc-reeb-tower is not installed. "
             'Install it with: pip install "sc-reeb-tower @ git+https://github.com/KrishnaswamyLab/scReebTower" '
             "or drop it from --methods."
+        )
+
+    if "gtda_mapper" in args.methods and make_mapper_pipeline is None:
+        raise SystemExit(
+            "gtda_mapper requested but giotto-tda is not installed. It pins scikit-learn==1.3.2, "
+            "so install it in a separate environment (see README, 'Synthetic track'), "
+            "or drop gtda_mapper from --methods."
         )
 
     manifest = load_dataset_manifest(dataset_dir)

@@ -7,7 +7,7 @@ The repository now has two tracks:
 - **Real data**: classify expert-annotated scRNA-seq graphs using fixed downstream models.
 - **Synthetic data**: score recovered graphs against ground-truth graph structure and persistence.
 
-The benchmark is method-agnostic. You provide graphs; scShapeBench evaluates them with a fixed pipeline.
+The benchmark is method-agnostic; just add todes and edges csv, and optionally h0 and h1 persistence
 
 ---
 
@@ -15,7 +15,7 @@ The benchmark is method-agnostic. You provide graphs; scShapeBench evaluates the
 
 Real-data evaluation asks whether a method's graph makes expert shape labels predictable.
 
-Synthetic evaluation asks whether a method recovers the contracted ground-truth graph, using:
+Synthetic evaluation asks whether a method recovers the underlying ground-truth graph, using:
 
 - graph edit distance as the primary topology score
 - persistence similarity as the primary persistence score
@@ -25,7 +25,7 @@ Synthetic evaluation asks whether a method recovers the contracted ground-truth 
 
 ## Installation
 
-Python 3.10–3.12 (giotto-tda, used by the method baselines, has no 3.13 build).
+Python 3.10–3.12.
 
 ```bash
 git clone https://github.com/KrishnaswamyLab/scShapeBench
@@ -35,8 +35,8 @@ source .venv/bin/activate
 ```
 
 The core install is enough to *evaluate* submissions. The `methods` extra adds the
-graph-extraction baselines (scReebTower, Scanpy PAGA, KeplerMapper, giotto-tda Mapper);
-scReebTower is installed from
+graph-extraction baselines (scReebTower, Scanpy PAGA, KeplerMapper); scReebTower is
+installed from
 [KrishnaswamyLab/scReebTower](https://github.com/KrishnaswamyLab/scReebTower).
 
 ---
@@ -209,6 +209,18 @@ python run_benchmark_synthetic.py run-methods \
 
 Add `--limit N` for a quick check. Outputs are cached per sample, so reruns are cheap.
 
+The fifth baseline, `gtda_mapper`, needs giotto-tda, which is not a project dependency:
+its only Python 3.12 release pins scikit-learn 1.3.2, which would change the real
+track's SVM scores. Run the synthetic baselines from a separate environment:
+
+```bash
+uv venv .venv-synthetic --python 3.12
+uv pip install --python .venv-synthetic -e ".[methods]" giotto-tda==0.6.2
+source .venv-synthetic/bin/activate
+python run_benchmark_synthetic.py run-methods --dataset-dir data/synthetic \
+  --methods screebtower screebtower_smooth paga mapper gtda_mapper --output-dir results/methods
+```
+
 Score your own predictions:
 
 ```bash
@@ -246,6 +258,43 @@ Secondary metrics include:
 - macro F1
 - exact match
 - per-class scores
+
+### Reproducing the paper's real-track table
+
+The paper's per-class table (GNN and MLP, Acc and F1 for Cl / ST / MT / A) uses the
+**`union`** label set. Score the submissions with `--label-type union`, then print the
+table in the paper's layout:
+
+```bash
+python run_benchmark.py --track real --real-mode all \
+  --submissions-dir submissions/scRNAseq --label-type union \
+  --splits splits/folds_v1.json --output results/union --device cpu
+python scripts/paper_table.py results/union/summary_union.csv --methods mapper paga
+```
+
+```text
+GNN MLP
+Cl ST MT A Cl ST MT A
+Method Acc F1 Acc F1 Acc F1 Acc F1 Acc F1 Acc F1 Acc F1 Acc F1
+mapper .60±.07 .71±.06 ... .65±.08 .78±.07 .64±.09 .75±.08 .92±.07 .96±.04 .73±.11 .84±.08
+```
+
+Add `--models gnn mlp pi_svm stats_svm rf` for every model, or `--format markdown`.
+
+What reproduces exactly, using the paper's graph files:
+
+- **MLP, RF, baselines:** identical to the paper.
+- **PI-SVM, Stats-SVM:** identical Acc/F1; AUC/AUPRC within 0.01, depending on the scikit-learn version.
+- **GNN:** within about ±0.05, because GNN training is not bit-reproducible.
+
+`tests/test_paper_reproduction.py` checks all of this:
+
+```bash
+uv run --frozen --extra methods --with pytest pytest -m "not slow"   # persistence files (seconds)
+uv run --frozen --extra methods --with pytest pytest                  # + 10-graph regression (minutes)
+SCSB_PAPER_SUBMISSIONS=/path/to/paper/submissions/scRNAseq \
+  uv run --frozen --extra methods --with pytest pytest                # + full paper table
+```
 
 ### Synthetic track
 
@@ -308,15 +357,6 @@ If you use scShapeBench, please cite the paper associated with this repository.
 
 ---
 
-## Common pitfalls
-
-- missing graph files
-- mismatched sample IDs
-- malformed CSV columns
-- using the wrong track or label type
-- including training logic in submissions
-
----
 
 ## Contact
 

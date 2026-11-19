@@ -18,7 +18,7 @@
 #SBATCH --output=logs/synthetic_%A_%a.out
 set -euo pipefail
 cd "$SLURM_SUBMIT_DIR"
-source .venv/bin/activate
+source "${VENV:-.venv}/bin/activate"  # .venv-synthetic for gtda_mapper (needs giotto-tda)
 export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK
 
 CHUNK=${CHUNK:-100}

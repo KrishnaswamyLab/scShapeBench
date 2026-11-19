@@ -207,14 +207,15 @@ For checking your own run: `knn2` (k = 2 on `X_pca`, 63 datasets, CPU), mean ± 
 | Model | macro AUPRC | macro AUC | macro balanced acc. |
 |---|---|---|---|
 | gnn | 0.510 ± 0.12 | 0.579 ± 0.13 | 0.609 ± 0.11 |
-| mlp | 0.549 ± 0.15 | 0.654 ± 0.16 | 0.619 ± 0.07 |
-| pi_svm | 0.418 ± 0.11 | 0.495 ± 0.13 | 0.536 ± 0.04 |
+| mlp | 0.470 ± 0.10 | 0.547 ± 0.11 | 0.512 ± 0.08 |
+| pi_svm | 0.507 ± 0.10 | 0.601 ± 0.08 | 0.514 ± 0.03 |
 | stats_svm | 0.546 ± 0.06 | 0.651 ± 0.05 | 0.574 ± 0.10 |
 | rf | 0.614 ± 0.08 | 0.717 ± 0.07 | 0.586 ± 0.03 |
 | baseline (random, train prevalence) | 0.432 ± 0.09 | 0.548 ± 0.07 | 0.488 ± 0.05 |
 
-`stats_svm`, `rf` and the baselines are deterministic and should match to three decimals;
-`gnn` and `mlp` may move slightly with hardware and torch version.
+`mlp`, `rf` and the baselines are deterministic and should match to three decimals; the
+SVM AUC/AUPRC can move by up to 0.01 with the scikit-learn version, and `gnn` may move by
+a few hundredths with hardware and torch version.
 
 ## Synthetic track
 
@@ -222,9 +223,16 @@ The synthetic track needs no cluster (1000 small point clouds, 46 MB), but the f
 baseline methods take about 17 s per sample, so splitting it into array tasks turns
 5 hours into about 30 minutes.
 
+The `gtda_mapper` baseline needs giotto-tda, which pins scikit-learn 1.3.2, so the
+synthetic jobs run from their own environment (`VENV`, default `.venv`):
+
 ```bash
-cd "$REPO" && source .venv/bin/activate
+cd "$REPO"
+uv venv .venv-synthetic --python 3.12
+uv pip install --python .venv-synthetic -e ".[methods]" giotto-tda==0.6.2
+source .venv-synthetic/bin/activate
 python scripts/download_data.py                 # → data/synthetic (login node)
+export VENV=.venv-synthetic
 A=$(sbatch --parsable --array=1-10 scripts/hpc/synthetic_methods.sbatch)   # 100 samples per task
 sbatch --dependency=afterok:$A scripts/hpc/synthetic_summary.sbatch
 ```

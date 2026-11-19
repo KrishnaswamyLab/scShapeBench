@@ -1,0 +1,6 @@
+# Paper table, union labels: per-class Acc and F1 (mean±std over 5 folds).
+# Columns: GNN Cl Acc, Cl F1, ST Acc, ST F1, MT Acc, MT F1, A Acc, A F1, then the same for MLP.
+# Only mapper and paga are listed: the paper's scReeb and scReebTower rows cannot be
+# reproduced from the graph files that remain.
+mapper .61±.08 .71±.07 .57±.06 .70±.06 .76±.05 .86±.04 .71±.14 .78±.12 .65±.08 .78±.07 .64±.09 .75±.08 .92±.07 .96±.04 .73±.11 .84±.08
+paga .69±.01 .78±.01 .70±.06 .81±.05 .80±.08 .88±.05 .73±.08 .81±.06 .65±.10 .76±.09 .67±.14 .77±.11 .91±.09 .95±.05 .74±.10 .84±.07

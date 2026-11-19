@@ -2,7 +2,6 @@
 name = "scShapeBench"
 version = "0.1.0"
 description = "scShapeBench – Benchmark"
-# giotto-tda (the `methods` extra) has no Python 3.13 build.
 requires-python = ">=3.10,<3.13"
 dependencies = [
     "numpy",
@@ -26,7 +25,6 @@ methods = [
     "leidenalg",
     "igraph",
     "kmapper",
-    "giotto-tda==0.6.2",
     "sc-reeb-tower @ git+https://github.com/KrishnaswamyLab/scReebTower",
 ]
 
@@ -39,3 +37,9 @@ allow-direct-references = true
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/scshapebench"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+    "slow: runs the real-track scorer (minutes); deselect with -m 'not slow'",
+]

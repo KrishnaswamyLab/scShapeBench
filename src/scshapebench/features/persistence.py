@@ -2,8 +2,8 @@
 Persistence image features extracted from graph homology data.
 
 Each graph stores:
-  h0_deaths  — finite H0 deaths, normalized to [0, 1] by the graph's max edge weight
-  h1_births  — essential H1 births, normalized to [0, 1] (death is always inf in a graph filtration)
+  h0_deaths  — finite H0 deaths, read from h0_finite.csv as given
+  h1_births  — essential H1 births, read from h1_essential.csv as given (death is always inf)
 
 We build (birth, persistence) pairs:
   H0: (0, death)        — components merge at the edge weight 'death'

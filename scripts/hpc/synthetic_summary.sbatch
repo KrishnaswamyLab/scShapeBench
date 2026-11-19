@@ -17,7 +17,7 @@
 #SBATCH --output=logs/synthetic_summary_%j.out
 set -euo pipefail
 cd "$SLURM_SUBMIT_DIR"
-source .venv/bin/activate
+source "${VENV:-.venv}/bin/activate"  # .venv-synthetic for gtda_mapper (needs giotto-tda)
 
 DATASET_DIR=${DATASET_DIR:-data/synthetic}
 OUTPUT_DIR=${OUTPUT_DIR:-results/synthetic}
